@@ -33,6 +33,7 @@ library(ggfortify)
 library(ggrepel)
 library(FunnelPlotR)
 library(ggfunnel)
+library(waffle)
 ```
 
 
@@ -242,5 +243,72 @@ tt_variables <- ttmeta::tt_datasets_metadata |>
 
 ```{r}
 tt_datasets
+```
+```{r}
+
+tt_datasets_grouped = tt_datasets %>% group_by(year) %>% summarise(Total_datasets = n())
+ggplot(data=tt_datasets_grouped,aes(x = year,y = Total_datasets)) + geom_col()
+
+
+```
+
+```{r}
+plot_df <- tt_datasets |>
+  group_by(year, week) |>
+  mutate(
+    obs_num = cut(
+      observations,
+      breaks = c(0, 200, 2000, 20000, 3771792),
+      include.lowest = TRUE,
+      right = FALSE,
+      labels = c("< 200", "200 to 1999", "2k to 19999", "≥ 20k")
+    ),
+    var_num = cut(
+      variables,
+      breaks = c(0, 5, 10, 15, 130),
+      include.lowest = TRUE,
+      right = FALSE,
+      labels = c("< 5", "5 to 9", "10 to 14", "≥ 15")
+    )
+  )
+
+
+# dataframe about the number of observations in each dataset
+obs_df <- plot_df |>
+  group_by(year) |>
+  count(obs_num)
+
+# dataframe about the number of variables in each dataset
+var_df <- plot_df |>
+  group_by(year) |>
+  count(var_num)
+```
+
+
+
+```{r}
+
+# Choosing colors
+bg_color <- "#f1f0ef"
+text_color <- "#005522"
+c_squares <- c("#006e89", "#ff6037", "#e6bc00", "#3a9234")
+
+
+# Create plot for number of observations per data
+obs_plot <- obs_df |>
+  ggplot(aes(fill = obs_num, values = n)) +
+  geom_waffle(color = text_color, size = .15, flip = TRUE) +
+  facet_wrap(~year, nrow = 1, strip.position = "bottom") +
+  scale_x_discrete() +
+  scale_y_continuous(
+    labels = function(x) x * 10,
+    expand = c(0, 0)
+  ) +
+  scale_fill_manual(values = c_squares) +
+  labs(
+    fill = "Number of observations"
+  ) 
+
+obs_plot
 ```
 
