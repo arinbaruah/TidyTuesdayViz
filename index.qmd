@@ -1,0 +1,246 @@
+---
+title: "Lifecycle of Steel: From Extraction to Recycling"
+author: "Arindom Baruah"
+date: "2024-01-25"
+categories: [R,data cleaning,exploratory data analysis,high dimensional data visualisation,model metrics, principal decomposition, non-linear decomposition]
+quarto-required: ">=1.3.0"
+format:
+    html:
+        output-file: post.html
+execute: 
+  echo: false
+  message: false
+  warning: false
+number-sections: true
+---
+
+
+```{r}
+
+library(tidyverse)
+library(tidymodels)
+library(ggplot2)
+library(kableExtra)
+library(caret)
+library(plotROC)
+library(mulgar)
+library(tourr)
+library(GGally)
+library(uwot)
+library(animation)
+library(magick)
+library(ggfortify)
+library(ggrepel)
+library(FunnelPlotR)
+library(ggfunnel)
+```
+
+
+
+```{r theme}
+
+library(tidyverse)
+library(stringr)
+library(glue)
+library(ggrepel)
+library(ggplot2)
+library(ggtext)
+library(showtext)
+
+
+# caption handles
+tt <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
+li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
+gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
+mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
+
+
+# plot colors
+bkg_col      <- colorspace::lighten('#c2cd87', 0.05)    
+title_col    <- "#3d3d3d"           
+subtitle_col <- "#3d3d3d"     
+caption_col  <- "black"   
+text_col     <- colorspace::darken("#dbdeef" , 0.2)  
+
+# fonts
+
+font_add('fa6-brands', 'fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
+font_add_google("Oswald", regular.wt = 400, family = "title")                 
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "subtitle")  
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
+font_add_google("Merriweather", regular.wt = 400,family = "caption")
+showtext_auto(enable = TRUE)  
+
+# Caption
+
+caption_text <- str_glue("{tt} {li} Arindam Baruah ; {gh} arinbaruah ; #rstudio #ggfunnel #ggplot2")
+
+theme_set(theme_minimal(base_size = 15, base_family = "text"))                
+
+# Theme updates
+
+theme_update(
+  plot.title.position   = "plot",
+  plot.caption.position = "plot",
+  legend.position       = 'plot',
+  plot.margin           = margin(t = 10, r = 15, b = 0, l = 15),
+  plot.background       = element_rect(fill = bkg_col, color = bkg_col),
+  panel.background      = element_rect(fill = bkg_col, color = bkg_col),
+  axis.title.x          = element_text(margin = margin(10, 0, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.title.y          = element_text(margin = margin(0, 10, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.text             = element_text(size = 10, color = text_col, family = 'text',face = "bold"),
+  panel.grid.minor.y    = element_blank(),
+  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'gray40'),
+  panel.grid.minor.x    = element_blank(),
+  panel.grid.major.x    = element_blank(),
+  axis.line.x           = element_line(color = "#d7d7d8", linewidth = .2),
+)
+
+ 
+
+```
+
+
+
+```{r}
+library(ggfunnel)
+
+df_steel <- read_csv("steel_production_recycling.csv")
+
+df_steel <- df_steel %>% mutate(Percent = 100*`Quantity (in tons)`/max(`Quantity (in tons)`))
+
+
+subtitle <- "A comprehensive breakdown of steel production indicating as high as **<span style='color: darkred;'>40% recycling efficiency</span>**"
+
+pl_funnel <- ggfunnel::funnel(
+    data = df_steel,
+    tile_specs = list(
+    fill = "#24754d",
+    colour = "#7C9299",
+    alpha = 0.8,
+    height = 0.7
+  ),
+  text_specs = list(
+    colour = "#ccdce2",
+    size =3
+  ),
+    values = Percent, levels = Stage
+  ) +
+  labs(
+       y = "Percentage of steel tons ",
+       title = "Lifecycle of Steel: From Extraction to Recycling",
+       subtitle = subtitle,
+       caption = labs(caption = caption_text)) +
+  theme(
+    plot.title.position   = "plot",
+    plot.caption.position = "plot",
+    legend.position       = "plot",
+    
+    plot.margin           = margin(t = 10, r = 15, b = 0, l = 15),       
+    plot.background       = element_rect(fill = bkg_col, color = bkg_col),
+    panel.background      = element_rect(fill = bkg_col, color = bkg_col),
+    
+    plot.title            = element_text(
+      size                = rel(2),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(1), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      lineheight          = 1.4, 
+      margin              = margin(t = 5, b = 1)
+    ),
+    plot.caption          = element_markdown(
+      size                = rel(.65), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.6,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    )
+  )
+pl_funnel
+```
+
+
+
+# TidyTuesdayR data
+
+```{r}
+
+tt_datasets <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-02/tt_datasets.csv')
+tt_summary <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-02/tt_summary.csv')
+tt_urls <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-02/tt_urls.csv')
+tt_variables <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-02/tt_variables.csv')
+
+
+```
+
+
+```{r}
+
+tt_datasets
+
+library(tidyverse)
+library(here)
+library(fs)
+pak::pak("r4ds/ttmeta")
+library(ttmeta)
+
+tt_summary <- ttmeta::tt_summary_tbl |> 
+  dplyr::select(-dplyr::ends_with("urls"))
+
+tt_urls <- ttmeta::tt_urls_tbl |> 
+  dplyr::mutate(
+    query = purrr::map_chr(
+      query,
+      \(x) {
+        if (!length(x)) {
+          return(NA_character_)
+        }
+        paste0(names(x), "=", x, collapse = "&")
+      }
+    )
+  )
+
+tt_datasets <- ttmeta::tt_datasets_metadata |> 
+  dplyr::filter(!is.na(dataset_name)) |> 
+  dplyr::select(-variable_details)
+
+tt_variables <- ttmeta::tt_datasets_metadata |> 
+  dplyr::filter(!is.na(dataset_name)) |> 
+  dplyr::select(-variables, -observations) |> 
+  tidyr::unnest(variable_details) |> 
+  dplyr::mutate(
+    min = purrr::map_chr(
+      min,
+      \(x) {
+        if (!length(x)) {
+          return(NA_character_)
+        }
+        as.character(x)
+      }
+    ),
+    max = purrr::map_chr(
+      max,
+      \(x) {
+        if (!length(x)) {
+          return(NA_character_)
+        }
+        as.character(x)
+      }
+    )
+  )
+```
+
+```{r}
+tt_datasets
+```
+
