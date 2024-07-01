@@ -117,13 +117,6 @@ ggplot(data=tt_datasets_grouped,aes(x = year,y = Total_datasets)) + geom_col()
 
 ```
 
-```{r}
-
-
-tt_datasets_grouped = tt_datasets %>% group_by(year) %>% summarise(Total_datasets = n())
-ggplot(data=tt_datasets,aes(x = variables/observations)) + geom_histogram() +labs(caption = caption_text)
-
-```
 
 
 ```{r theme}
@@ -163,7 +156,7 @@ showtext_auto(enable = TRUE)
 
 # Plot texts
 
-title_text <- "Understanding Dataset Dimensionality Across TidyTuesdayR: A Visual Exploration"
+title_text <- "Understanding Dataset Dimensionality \n Across TidyTuesdayR: A Visual Exploration"
 
 subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality__"
 
@@ -250,7 +243,7 @@ dim_order <- c("Problematic datasets (< 1)","Low dimensional (> 20)","Moderate d
 ratio_df$status <- factor(ratio_df$status, levels = dim_order)
 
 dimensional_waffle <- ggplot(data = ratio_df,aes(fill = status, values = n)) +
-  geom_waffle(color = text_color, size = .1, flip = TRUE) +
+  geom_waffle(color = text_col, size = .1, flip = TRUE) +
   facet_wrap(~year, nrow = 1, strip.position = "bottom") +
   scale_x_discrete() +
   scale_y_continuous(
@@ -328,7 +321,7 @@ dim_order <- c("Upto 6 variables", "7-15 variables", "Greater than 15 varables")
 variable_df$variable_category <- factor(variable_df$variable_category, levels = dim_order)
 
 variable_waffle <- ggplot(data = variable_df,aes(fill = variable_category, values = n)) +
-  geom_waffle(color = text_color, size = .15, flip = TRUE) +
+  geom_waffle(color = text_col, size = .15, flip = TRUE) +
   facet_wrap(~year, nrow = 1, strip.position = "bottom") +
   scale_x_discrete() +
   scale_y_continuous(
