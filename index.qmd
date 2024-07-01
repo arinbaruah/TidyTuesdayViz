@@ -121,44 +121,10 @@ ggplot(data=tt_datasets_grouped,aes(x = year,y = Total_datasets)) + geom_col()
 
 
 tt_datasets_grouped = tt_datasets %>% group_by(year) %>% summarise(Total_datasets = n())
-ggplot(data=tt_datasets,aes(x = variables)) + geom_histogram() +labs(caption = caption_text)
+ggplot(data=tt_datasets,aes(x = variables/observations)) + geom_histogram() +labs(caption = caption_text)
 
 ```
 
-
-
-```{r}
-tt_grouped_df <- tt_datasets %>%
-  group_by(year, week) %>%
-  mutate(
-    obs_num = cut(
-      observations,
-      breaks = c(0, 200, 2000, 20000, 3771792),
-      include.lowest = TRUE,
-      right = FALSE,
-      labels = c("< 200", "200 to 1999", "2k to 19999", "> 20k")
-    ),
-    var_num = cut(
-      variables,
-      breaks = c(0, 5, 10, 15, 130),
-      include.lowest = TRUE,
-      right = FALSE,
-      labels = c("< 5", "5 to 9", "10 to 14", "≥ 15")
-    )
-  )
-
-tt_grouped_df <- tt_datasets %>% group_by(year,week) %>% mutate(variable_category = case_when(variables <= 6 ~ "Low dimensions (0-6)",
-                                                                              variables > 6 & variables <=15 ~ "Medium dimensions (7-15)",
-                                                                              variables > 15  ~ "High dimensions (> 15)"))
-
-# obs_df <- tt_grouped_df |>
-#   group_by(year) |>
-#   count(obs_num)
-
-
-variable_df <- tt_grouped_df |>
-  group_by(year) |> count(variable_category)
-```
 
 ```{r theme}
 
@@ -183,7 +149,7 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 bkg_col      <- colorspace::lighten('#EAE3DC', 0.05)    
 title_col    <- "#3d3d3d"           
 subtitle_col <- "#3d3d3d"     
-caption_col  <- "black"   
+caption_col  <- "#72647D"   
 text_col     <- colorspace::darken("gray40" , 0.2)  
 
 # fonts
@@ -197,11 +163,14 @@ showtext_auto(enable = TRUE)
 
 # Plot texts
 
-title_text <- "Number of observations"
+title_text <- "How large are the datasets in the TidyTuesdayR repository ?"
+
+subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality__"
+
 
 X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
 
-caption_text <- str_glue("{tt} ; {li} Arindam Baruah ; {gh} arinbaruah ; #rstudio #gg_waffle #ggplot2")
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | #rstudio #gg_waffle #ggplot2")
 
 theme_set(theme_minimal(base_size = 15, base_family = "text"))                
 
@@ -231,10 +200,112 @@ theme_update(
 
 
 ```{r}
+# Preparing data
 
-waffle_box <- c("#006e89", "#ff6037", "#e6bc00", "#3a9234")
+tt_grouped_df <- tt_datasets %>% group_by(year,week) %>% mutate(variable_category = case_when(variables <= 6 ~ "Upto 6 variables",
+                                                                              variables > 6 & variables <=15 ~ "7-15 variables",
+                                                                              variables > 15  ~ "Greater than 15 varables"))
 
-dim_order <- c("Low dimensions (0-6)", "Medium dimensions (7-15)", "High dimensions (> 15)")
+variable_df <- tt_grouped_df %>%
+  group_by(year) %>% count(variable_category)
+
+
+
+tt_grouped_ratio_df <- tt_datasets %>% group_by(year,week) %>% mutate(ratio = observations/variables)
+
+
+tt_grouped_ratio_df <- tt_grouped_ratio_df %>% mutate(status = case_when(ratio <= 1 ~ "Problematic datasets (< 1)",
+                                                                         ratio <= 10 ~ "High dimensional (<= 10)",
+                                                                         ratio > 10 & ratio <=15 ~ "Moderate dimensional (10-15)",
+                                                                         ratio > 20 ~ "Low dimensional (> 20)"))
+ratio_df <- tt_grouped_ratio_df %>%
+  group_by(year) %>% count(status)
+
+```
+
+```{r}
+
+subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, <br> making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality.__"
+
+waffle_box <- c("#CF352E", "#e6bc00", "#3a9234","#FB8B23")
+
+dim_order <- c("Problematic datasets (< 1)","Low dimensional (> 20)","Moderate dimensional (10-15)", "High dimensional (<= 10)")
+
+ratio_df$status <- factor(ratio_df$status, levels = dim_order)
+
+variable_waffle <- ggplot(data = ratio_df,aes(fill = status, values = n)) +
+  geom_waffle(color = text_color, size = .1, flip = TRUE) +
+  facet_wrap(~year, nrow = 1, strip.position = "bottom") +
+  scale_x_discrete() +
+  scale_y_continuous(
+   labels = function(x) x * 10,   # 10 observations per row
+    expand = c(0, 0)
+  ) +
+  scale_fill_manual(values = waffle_box) +
+  labs(
+  title = title_text,
+  fill = "",
+   y = "Number of datasets",
+  subtitle = subtitle_text,
+  caption = caption_text) + 
+  theme(legend.position = "top",
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = 8,
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = 8,
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(1.3),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.66), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 1.4, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.5), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.6,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title.y = element_text(size = 10,
+                                family = "text")
+  ) + coord_equal()
+
+
+
+variable_waffle
+
+```
+
+
+
+```{r}
+
+waffle_box <- c("#ff6037", "#e6bc00", "#3a9234")
+
+dim_order <- c("Upto 6 variables", "7-15 variables", "Greater than 15 varables")
 
 variable_df$variable_category <- factor(variable_df$variable_category, levels = dim_order)
 
@@ -248,12 +319,11 @@ variable_waffle <- ggplot(data = variable_df,aes(fill = variable_category, value
   ) +
   scale_fill_manual(values = waffle_box) +
   labs(
-  title = "Distribution of dimensions in TidyTuesdayR repository",
-  fill = "Number of dimensions",
+  title = title_text,
+  fill = "",
    y = "Number of datasets",
-  subtitle = subtitle,
+  subtitle = subtitle_text,
   caption = caption_text) + 
-  
   theme(legend.position = "top",
     legend.title.position = "top",
     legend.title = element_text(
@@ -268,11 +338,42 @@ variable_waffle <- ggplot(data = variable_df,aes(fill = variable_category, value
       family = "text",
       size = 10
     ),
-)
+    plot.title            = element_text(
+      size                = rel(1.3),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.66), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0.2,
+      lineheight          = 1.4, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.5), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.6,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    )
+  ) + coord_equal()
+
+
 
 variable_waffle
 
 ```
 
+```{r}
+
+```
 
 
