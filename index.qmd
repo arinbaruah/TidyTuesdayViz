@@ -139,7 +139,7 @@ library(showtext)
 
 
 # caption handles
-tt <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
+swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
 li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
 gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
 mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
@@ -163,14 +163,14 @@ showtext_auto(enable = TRUE)
 
 # Plot texts
 
-title_text <- "How large are the datasets in the TidyTuesdayR repository ?"
+title_text <- "Understanding Dataset Dimensionality Across TidyTuesdayR: A Visual Exploration"
 
 subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality__"
 
 
 X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
 
-caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | #rstudio #gg_waffle #ggplot2")
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #gg_waffle #ggplot2")
 
 theme_set(theme_minimal(base_size = 15, base_family = "text"))                
 
@@ -202,24 +202,40 @@ theme_update(
 ```{r}
 # Preparing data
 
+var_order <- c("Upto 6 variables",
+               "7-15 variables",
+               "Greater than 15 varables")
 tt_grouped_df <- tt_datasets %>% group_by(year,week) %>% mutate(variable_category = case_when(variables <= 6 ~ "Upto 6 variables",
                                                                               variables > 6 & variables <=15 ~ "7-15 variables",
-                                                                              variables > 15  ~ "Greater than 15 varables"))
+                                                                              variables > 15  ~ "Greater than 15 varables"))  %>%
+                                                                              mutate(variable_category = factor(variable_category, levels = var_order))
 
 variable_df <- tt_grouped_df %>%
-  group_by(year) %>% count(variable_category)
+  group_by(year,variable_category) %>% count()  %>%
+  ungroup() %>%
+  arrange(year, variable_category)
 
 
 
 tt_grouped_ratio_df <- tt_datasets %>% group_by(year,week) %>% mutate(ratio = observations/variables)
 
+status_order <- c(
+  "Problematic datasets (< 1)",
+  "Low dimensional (> 20)",
+  "Moderate dimensional (10-15)",
+  "High dimensional (<= 10)"
+)
 
 tt_grouped_ratio_df <- tt_grouped_ratio_df %>% mutate(status = case_when(ratio <= 1 ~ "Problematic datasets (< 1)",
                                                                          ratio <= 10 ~ "High dimensional (<= 10)",
                                                                          ratio > 10 & ratio <=15 ~ "Moderate dimensional (10-15)",
-                                                                         ratio > 20 ~ "Low dimensional (> 20)"))
+                                                                         ratio > 20 ~ "Low dimensional (> 20)")) %>%
+                                                                         mutate(status = factor(status, levels = status_order))
 ratio_df <- tt_grouped_ratio_df %>%
-  group_by(year) %>% count(status)
+  group_by(year, status) %>%
+  count() %>%
+  ungroup() %>%
+  arrange(year, status)
 
 ```
 
@@ -233,7 +249,7 @@ dim_order <- c("Problematic datasets (< 1)","Low dimensional (> 20)","Moderate d
 
 ratio_df$status <- factor(ratio_df$status, levels = dim_order)
 
-variable_waffle <- ggplot(data = ratio_df,aes(fill = status, values = n)) +
+dimensional_waffle <- ggplot(data = ratio_df,aes(fill = status, values = n)) +
   geom_waffle(color = text_color, size = .1, flip = TRUE) +
   facet_wrap(~year, nrow = 1, strip.position = "bottom") +
   scale_x_discrete() +
@@ -295,7 +311,7 @@ variable_waffle <- ggplot(data = ratio_df,aes(fill = status, values = n)) +
 
 
 
-variable_waffle
+dimensional_waffle
 
 ```
 
@@ -303,6 +319,8 @@ variable_waffle
 
 ```{r}
 
+title_text <- "How wide are the datasets in TidyTuesdayR repository?"
+subtitle_text <- "Wide datasets typically have more than 10 variables. With more number of variables, the curse of <br> dimensionality starts creeping in!"
 waffle_box <- c("#ff6037", "#e6bc00", "#3a9234")
 
 dim_order <- c("Upto 6 variables", "7-15 variables", "Greater than 15 varables")
@@ -351,7 +369,7 @@ variable_waffle <- ggplot(data = variable_df,aes(fill = variable_category, value
       size                = rel(0.66), 
       family              = 'subtitle',
       color               = subtitle_col,
-      hjust               = 0.2,
+      hjust               = 0,
       lineheight          = 1.4, 
       margin              = margin(t = 5, b = 1)
     ),
@@ -372,8 +390,5 @@ variable_waffle
 
 ```
 
-```{r}
-
-```
 
 
