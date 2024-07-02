@@ -398,6 +398,10 @@ library(paletteer)
 library(colorspace)
 library(extrafont)
 
+title_text <- "How wide and long are the datasets in TidyTuesdayR?"
+
+subtitle_text <- "The dimensions of a dataset can indicate important characteristics of a dataset. Datasets with much more number of observations than variables <br> are termed as __long datasets__ while those with sizeable number of variables are termed as __wide datasets__."
+
 tt_grouped_ratio_df <- tt_grouped_ratio_df %>% mutate(status = case_when(ratio <= 1 ~ "Problematic datasets (< 1)",
                                                                          ratio <= 10 ~ "High dimensional (<= 10)",
                                                                          ratio > 10 & ratio <=15 ~ "Moderate dimensional (10-15)",
@@ -409,10 +413,15 @@ ratio_df <- tt_grouped_ratio_df %>%
   ungroup() %>%
   arrange(year, status)
 
+options(scipen = 99)
 
+tt_grouped_ratio_df <- tt_grouped_ratio_df %>% rename("Variables" = "variables",
+                                                      "Observations" = "observations")
 
-df <- tibble(df)
-tt_datasets_long <- tt_grouped_ratio_df %>% pivot_longer(cols = variables:observations,names_to = "type",values_to = "number") %>% filter(number < 10^6)
+tt_datasets_long <- tt_grouped_ratio_df %>% 
+  pivot_longer(cols = Variables:Observations,
+               names_to = "type",values_to = "number") %>% filter(number < 250000)
+
 
 gr =  tt_datasets_long  %>% drop_na() |>
     ggplot(aes(number, factor(year))) +
@@ -427,7 +436,8 @@ gr =  tt_datasets_long  %>% drop_na() |>
     
     theme_minimal(base_family = "text") +
     labs( title = title_text,
-   y = "Number of datasets",
+          x = "Dimension of dataset",
+          y = "",
   subtitle = subtitle_text,
   caption = caption_text) + 
   theme(legend.position = "top",
@@ -455,7 +465,7 @@ gr =  tt_datasets_long  %>% drop_na() |>
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(0.66), 
+      size                = rel(0.8), 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
@@ -463,7 +473,7 @@ gr =  tt_datasets_long  %>% drop_na() |>
       margin              = margin(t = 5, b = 1)
     ),
       plot.caption          = element_markdown(
-      size                = rel(0.5), 
+      size                = rel(0.7), 
       family              = 'caption',
       color               = caption_col,
       lineheight          = 0.6,
@@ -473,7 +483,7 @@ gr =  tt_datasets_long  %>% drop_na() |>
     ),
     axis.title.y = element_text(size = 10,
                                 family = "text")
-  )
+  ) 
 gr
 
 ```
