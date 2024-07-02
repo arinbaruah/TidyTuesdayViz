@@ -400,7 +400,7 @@ library(extrafont)
 
 title_text <- "How wide and long are the datasets in TidyTuesdayR?"
 
-subtitle_text <- "The dimensions of a dataset can indicate important characteristics of a dataset. Datasets with much more number of observations than variables <br> are termed as __long datasets__ while those with sizeable number of variables are termed as __wide datasets__."
+subtitle_text <- "The dimensions of a dataset can indicate its important characteristics. Datasets with much more number of observations <br> than variables are termed as __long datasets__ while those with sizeable number of variables are termed as __wide datasets__."
 
 tt_grouped_ratio_df <- tt_grouped_ratio_df %>% mutate(status = case_when(ratio <= 1 ~ "Problematic datasets (< 1)",
                                                                          ratio <= 10 ~ "High dimensional (<= 10)",
@@ -426,7 +426,7 @@ tt_datasets_long <- tt_grouped_ratio_df %>%
 gr =  tt_datasets_long  %>% drop_na() |>
     ggplot(aes(number, factor(year))) +
     geom_density_ridges(aes(fill = factor(year)), color = "grey30", linewidth = .25, alpha = .9) +
-    geom_vline(xintercept = c(6, 15), linewidth = .3, linetype = "dotted", lineend = "round") +
+    geom_vline(xintercept = c(0,6,15), linewidth = .3, linetype = "dotted", lineend = "round") +
     facet_wrap(vars(type),scales= "free_x",nrow=1) +
     
     scale_fill_manual(values = paletteer_d("ggthemes::Tableau_20"), guide = "none") +
