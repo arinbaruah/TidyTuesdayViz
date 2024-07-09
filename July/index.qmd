@@ -514,9 +514,8 @@ drob_funs_grouped
 ```
 
 ```{r}
-drob_funs_grouped$pkgs = paste0(
-    "<span style='font-size:11pt; color:grey20'>**", drob_funs_grouped$pkgs, "**</span><br>",
-    "<span style='color:grey30'>","</span>"
+drob_funs_grouped$funs = paste0(
+    drob_funs_grouped$funs,"()"
 )
 ```
 
@@ -637,8 +636,32 @@ ggplot(data = drob_funs_grouped, aes(x = Total, y = pkgs, fill = factor(funs))) 
 library(treemap)
 treemap(drob_funs_grouped,
             index=c("pkgs","funs"),
-            vSize="Total",
-        type = "index",title = "Types of waste in each state of Australia (2006-2021)") 
+            vSize="Total",title = "Popular CRAN packages and their functions") 
 
 ```
+
+```{r}
+library(treemap)
+
+# Assuming 'drob_funs_grouped' is your data frame
+# Create the treemap
+treemap(
+  drob_funs_grouped,
+  index = c("pkgs", "funs"),
+  vSize = "Total",
+  vColor = "Total", # This will color the tiles based on the 'Total' value
+  type = "value", # Use 'value' to color tiles by a variable
+  palette = "Set3", # Choose a color palette
+  title = "Popular CRAN packages and their functions",
+  fontsize.labels = c(18, 10), # Adjust font sizes for labels
+  fontsize.title = 20, # Font size for title
+  fontcolor.labels = "black", # Color of the labels
+  fontface.labels = 2, # Font face for labels (bold)
+  bg.labels = 1, # Background color of labels
+  align.labels = list(c("center", "center"), c("left", "top")), # Alignment of labels
+  border.col = "gray", # Border color of the tiles
+  draw = TRUE
+) 
+```
+
 
