@@ -491,4 +491,145 @@ gr
 ggplot(tt_datasets,aes(x = observations)) + geom_boxplot()
 ```
 
+# 2nd week July
+
+
+```{r}
+drob_funs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-09/drob_funs.csv')
+```
+
+
+
+```{r}
+drob_funs
+```
+
+```{r}
+
+top_packages <- drob_funs %>% group_by(pkgs) %>% summarise(Total = n()) %>% arrange(-Total) %>% head(10)
+drob_funs_grouped = drob_funs %>% filter(pkgs %in% top_packages$pkgs) %>% group_by(pkgs,funs) %>% summarise(Total = n()) %>% arrange(-Total) 
+```
+```{r}
+drob_funs_grouped
+```
+
+```{r}
+drob_funs_grouped$pkgs = paste0(
+    "<span style='font-size:11pt; color:grey20'>**", drob_funs_grouped$pkgs, "**</span><br>",
+    "<span style='color:grey30'>","</span>"
+)
+```
+
+
+```{r}
+library(data.table)
+library(stringr)
+
+library(ggplot2)
+library(ggforce)
+library(ggtext)
+library(ggsci)
+
+library(extrafont)
+
+canva_colors_extended <- c("#AEC6CF", "#77DD77", "#FFB347", "#FFD1DC", "#FFB3BA", 
+                   "#CBAACB", "#BEE7E8", "#FDFD96", "#FF6961", "#B39EB5", 
+                   "#B2FBA5", "#D3D3D3")
+
+
+# Ensure there are enough colors by repeating the palette if necessary
+unique_funs <- length(unique(drob_funs_grouped$funs))
+canva_colors <- rep(canva_colors_extended, length.out = unique_funs)
+
+drob_funs_grouped <- drob_funs_grouped %>%
+  group_by(pkgs) %>%
+  mutate(max_funs = funs == max(funs)) %>%
+  ungroup()
+
+drob_funs_grouped <- drob_funs_grouped %>%
+  mutate(label = ifelse(max_funs, as.character(funs), ""))
+
+
+ggplot(data = drob_funs_grouped, aes(x = Total, y = pkgs,fill=funs)) +  
+  geom_col(position = "fill") + 
+  scale_x_continuous(expand = c(0, 0), labels = scales::percent) +
+    theme_minimal() +
+    scale_fill_manual(values = canva_colors) +
+  theme(
+        axis.text.y = element_markdown(),
+        legend.position = "none",
+
+        panel.spacing = unit(0, "lines"),
+
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+
+        panel.grid.major.x = element_line(linewidth = .3, linetype = "dashed", color = "grey50"),
+
+        strip.text = element_text(face = "bold", hjust = 0, color = "grey10", size = 12),
+
+        plot.title.position = "plot",
+        plot.caption.position = "plot",
+
+        plot.title    = element_text(face = "bold", size = 26),
+        plot.subtitle = element_markdown(margin = margin(b = 20), size = 10),
+        plot.caption  = element_markdown(margin = margin(t = 20), size = 6),
+
+        plot.background = element_rect(fill = "grey98", color = NA),
+
+        plot.margin = margin(20, 20, 20, 20)
+    ) 
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(scales)
+
+# Assuming 'drob_funs_grouped' is your data frame
+
+# Identify the largest 'Total' for each 'pkgs'
+drob_funs_grouped <- drob_funs_grouped %>%
+  group_by(pkgs) %>%
+  mutate(max_total = Total == max(Total)) %>%
+  ungroup()
+
+# Create a new column to indicate whether a value should be labeled
+drob_funs_grouped <- drob_funs_grouped %>%
+  mutate(label = ifelse(max_total, as.character(funs), ""))
+
+# Define a pastel color palette
+pastel_colors <- c("#AEC6CF", "#77DD77", "#FFB347", "#FFD1DC", "#FFB3BA", 
+                   "#CBAACB", "#BEE7E8", "#FDFD96", "#FF6961", "#B39EB5", 
+                   "#B2FBA5", "#D3D3D3")
+
+# Ensure there are enough colors by repeating the palette if necessary
+unique_funs <- length(unique(drob_funs_grouped$funs))
+pastel_colors <- rep(pastel_colors, length.out = unique_funs)
+
+# Plot with conditional labeling and pastel colors
+ggplot(data = drob_funs_grouped, aes(x = Total, y = pkgs, fill = factor(funs))) +  
+  geom_col(position = "fill") +     
+  #geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 3) +  # Add labels conditionally
+  scale_fill_manual(values = pastel_colors) +  # Use pastel colors
+  scale_x_continuous(expand = c(0, 0), labels = scales::percent) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_markdown(),
+    legend.position = "none",
+    panel.spacing = unit(0, "lines"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_line(linewidth = .3, linetype = "dashed", color = "grey50"),
+    strip.text = element_text(face = "bold", hjust = 0, color = "grey10", size = 12),
+    plot.title.position = "plot",
+    plot.caption.position = "plot",
+    plot.title = element_text(face = "bold", size = 26),
+    plot.subtitle = element_markdown(margin = margin(b = 20), size = 10),
+    plot.caption = element_markdown(margin = margin(t = 20), size = 6),
+    plot.background = element_rect(fill = "grey98", color = NA),
+    plot.margin = margin(20, 20, 20, 20)
+  ) + annotate("text", x = 0.5, y = 9.5, label = "Largest", color = "black", size = 4, fontface = "bold") +
+  annotate("text", x = 0.75, y = 8.5, label = "Value", color = "black", size = 4, fontface = "bold")
+```
 

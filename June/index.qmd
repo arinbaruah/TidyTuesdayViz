@@ -162,7 +162,7 @@ ggplot(data=tt_datasets_grouped,aes(x = year,y = Total_datasets)) + geom_col()
 
 ```
 
-
+# Week 1 July
 
 ```{r theme}
 
@@ -536,9 +536,59 @@ gr
 ggplot(tt_datasets,aes(x = observations)) + geom_boxplot()
 ```
 
+# Week 2 July
+
 ```{r}
 
 drob_funs <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-09/drob_funs.csv')
 drob_funs
 ```
+
+```{r}
+# Install and load the networkD3 package
+library(networkD3)
+
+# Create a data frame for nodes
+nodes <- data.frame(
+  name = c("Source A", "Source B", "Intermediate 1", "Intermediate 2", "Destination 1", "Destination 2")
+)
+
+# Create a data frame for links
+links <- data.frame(
+  source = c(0, 1, 0, 2, 3, 3),
+  target = c(2, 2, 3, 4, 4, 5),
+  value = c(10, 20, 30, 40, 20, 10)
+)
+
+# Generate the Sankey diagram
+sankeyNetwork(Links = links, Nodes = nodes, Source = "source", Target = "target", Value = "value", NodeID = "name", units = "TWh", fontSize = 12, nodeWidth = 30)
+
+```
+
+
+```{r}
+# Install and load the necessary packages
+
+library(ggplot2)
+library(ggalluvial)
+
+# Create a data frame for the alluvial plot
+alluvial_data <- data.frame(
+  source = c("Source A", "Source A", "Source B", "Source B", "Intermediate 1", "Intermediate 2"),
+  target = c("Intermediate 1", "Intermediate 2", "Intermediate 1", "Intermediate 2", "Destination 1", "Destination 2"),
+  value = c(10, 30, 20, 40, 60, 10)
+)
+
+# Create the alluvial plot
+ggplot(alluvial_data,
+       aes(axis1 = source, axis2 = target, y = value)) +
+  geom_alluvium(aes(fill = source), width = 1/12) +
+  geom_stratum(width = 1/12, fill = "black", color = "grey") +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("Source", "Target"), expand = c(0.15, 0.05)) +
+  labs(title = "Alluvial Plot", x = "Stage", y = "Value") +
+  theme_minimal()
+
+```
+
 
