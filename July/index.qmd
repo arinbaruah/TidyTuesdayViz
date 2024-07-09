@@ -633,3 +633,12 @@ ggplot(data = drob_funs_grouped, aes(x = Total, y = pkgs, fill = factor(funs))) 
   annotate("text", x = 0.75, y = 8.5, label = "Value", color = "black", size = 4, fontface = "bold")
 ```
 
+```{r}
+library(treemap)
+treemap(drob_funs_grouped,
+            index=c("pkgs","funs"),
+            vSize="Total",
+        type = "index",title = "Types of waste in each state of Australia (2006-2021)") 
+
+```
+
