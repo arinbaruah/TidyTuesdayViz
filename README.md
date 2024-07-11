@@ -9,3 +9,7 @@ This repository contains all the visualisation entries to TidyTuesday challenges
 # 3rd July
 
 ![](https://github.com/arinbaruah/TidyTuesdayViz/blob/main/July/index_files/figure-html/unnamed-chunk-8-1.png)
+
+# 11th July
+
+![](https://github.com/arinbaruah/TidyTuesdayViz/blob/main/July/index_files/figure-html/Treemap.png)
