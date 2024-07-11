@@ -139,7 +139,7 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 
 
 # plot colors
-bkg_col      <- colorspace::lighten("#f9fbfe", 0.05)    
+bkg_col      <- colorspace::lighten("cornsilk", 0.05)    
 title_col    <- "#3d3d3d"           
 subtitle_col <- "#3d3d3d"     
 caption_col  <- "#72647D"   
@@ -506,7 +506,7 @@ drob_funs
 
 ```{r}
 
-top_packages <- drob_funs %>% group_by(pkgs) %>% summarise(Total = n()) %>% arrange(-Total) %>% head(10)
+top_packages <- drob_funs %>% group_by(pkgs) %>% summarise(Total = n()) %>% arrange(-Total) %>% head(10) # Top 10
 drob_funs_grouped = drob_funs %>% filter(pkgs %in% top_packages$pkgs) %>% group_by(pkgs,funs) %>% summarise(Total = n()) %>% arrange(-Total) 
 ```
 ```{r}
@@ -577,7 +577,7 @@ ggplot(data = drob_funs_grouped, aes(x = Total, y = pkgs,fill=funs)) +
         plot.background = element_rect(fill = "grey98", color = NA),
 
         plot.margin = margin(20, 20, 20, 20)
-    ) 
+    ) + labs(caption = caption_text)
 ```
 
 ```{r}
@@ -642,26 +642,29 @@ treemap(drob_funs_grouped,
 
 ```{r}
 library(treemap)
+library(grid)
 
-# Assuming 'drob_funs_grouped' is your data frame
-# Create the treemap
-treemap(
+treemap_plot <- treemap(
   drob_funs_grouped,
   index = c("pkgs", "funs"),
   vSize = "Total",
   vColor = "Total", # This will color the tiles based on the 'Total' value
   type = "value", # Use 'value' to color tiles by a variable
   palette = "Set3", # Choose a color palette
-  title = "Popular CRAN packages and their functions",
+  title = "David Robinson's top 10 most used R packages and their functions in TidyTuesdayR",
   fontsize.labels = c(18, 10), # Adjust font sizes for labels
-  fontsize.title = 20, # Font size for title
+  fontsize.title = 17, # Font size for title
   fontcolor.labels = "black", # Color of the labels
-  fontface.labels = 2, # Font face for labels (bold)
-  bg.labels = 1, # Background color of labels
+  fontface.labels = 1.5, # Font face for labels (bold)
+  fontfamily.title = "title",
+  fontfamily.labels = "text",
+  bg.labels = 6, # Background color of labels
   align.labels = list(c("center", "center"), c("left", "top")), # Alignment of labels
   border.col = "gray", # Border color of the tiles
   draw = TRUE
 ) 
+
 ```
+
 
 
