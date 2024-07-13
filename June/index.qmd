@@ -63,12 +63,7 @@ lgbtq_movies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascien
 
 
 
-```{r}
-lgbtq_movies
 
-top_langs <- lgbtq_movies %>% group_by(original_language) %>% summarise(Total = n()) %>% arrange(-Total) %>% head(8)
-lgbtq_movies <- lgbtq_movies %>% filter(original_language %in% top_langs$original_language)
-```
 
 
 
@@ -79,20 +74,7 @@ ggplot(data = top_langs,aes(x = original_language, y = Total)) + geom_col()
 
 
 
-```{r}
 
-
-lgbtq_colors <- c("#FF0018", "#FFA52C", "#FFFF41", "#008018", "#0000F9", "#86007D", "#8B4513", "#FFD700")
-
-
-ggplot(data = lgbtq_movies,aes(x = vote_average,fill = original_language)) + 
-  geom_density(alpha =0.9) + 
-  scale_fill_manual(values = lgbtq_colors) +
-  facet_wrap(~original_language,
-             ncol = 2) +
-  labs(x = "Average Vote Score",y="")
-
-```
 
 
 
@@ -168,7 +150,6 @@ ggplot(data=tt_datasets_grouped,aes(x = year,y = Total_datasets)) + geom_col()
 
 ```
 
-# Week 1 July
 
 ```{r theme}
 
@@ -190,7 +171,7 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 
 
 # plot colors
-bkg_col      <- colorspace::lighten("#f9fbfe", 0.05)    
+bkg_col      <- colorspace::lighten("#f2f5e5", 0.05)    
 title_col    <- "#3d3d3d"           
 subtitle_col <- "#3d3d3d"     
 caption_col  <- "#72647D"   
@@ -241,6 +222,108 @@ theme_update(
 
 ```
 
+
+# June 
+
+```{r}
+lgbtq_movies
+
+top_langs <- lgbtq_movies %>% group_by(original_language) %>% summarise(Total = n()) %>% arrange(-Total) %>% head(6)
+lgbtq_movies <- lgbtq_movies %>% filter(original_language %in% top_langs$original_language)
+```
+
+
+
+
+
+```{r}
+
+
+lgbtq_colors <- c("#FF0018", "#FFA52C", "#FFFF41", "#008018", "#0000F9", "#86007D", "#8B4513", "#FFD700")
+
+
+title_text <- "Average vote score distribution by Language in LGBTQ+ Movies"
+
+ggplot(data = lgbtq_movies,aes(x = vote_average,fill = original_language)) + 
+  geom_density(alpha =0.9) + 
+  scale_fill_manual(values = lgbtq_colors) +
+  facet_wrap(~original_language,
+             ncol = 2) +
+  labs(x = "Average Vote Score",
+       y="",
+       title = title_text) +
+  theme(
+    axis.text.y = element_blank(),
+    plot.title        = element_text(
+      size                = rel(1.3),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ))
+
+```
+
+```{r}
+lgbtq_movies <- lgbtq_movies %>% mutate(original_lang = case_when(original_language == "en" ~ "English",
+                                                  original_language == "pt" ~ "Portugese",
+                                                  original_language == "ja" ~ "Japanese",
+                                                  original_language == "fr" ~ "French",
+                                                  original_language == "es" ~ "Spanish",
+                                                  original_language == "de" ~ "German",
+                                                  .default = original_language))
+```
+
+
+
+
+```{r}
+lgbtq_colors <- c("#FF0018", "#FFA52C", "#FFFF41", "#008018", "#0000F9", "#86007D", "#8B4513", "#FFD700")
+
+subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, <br> making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality.__"
+
+lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) + 
+  geom_density_ridges(aes(fill = factor(original_lang)), color = "grey30", linewidth = .25, alpha = .9) +
+  scale_fill_manual(values = lgbtq_colors) +
+  geom_vline(xintercept = c(0,5,10), linewidth = .3, linetype = "dotted", lineend = "round",alpha = 0.5) +
+  labs(x = "Average Vote Score",
+       y="",
+       title = title_text,
+       subtitle = subtitle_text) +
+  theme(
+    axis.text.y        = element_text(
+      size                = rel(1.3),
+      family              = "text",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),
+    plot.title        = element_text(
+      size                = rel(1.3),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),
+    plot.subtitle         = element_markdown(
+      size                = rel(0.66), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 1.4, 
+      margin              = margin(t = 5, b = 1)
+    ))
+```
+
+
+
+# July
 
 
 ```{r}
