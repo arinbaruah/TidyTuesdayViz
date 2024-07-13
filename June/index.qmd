@@ -242,7 +242,7 @@ lgbtq_movies <- lgbtq_movies %>% filter(original_language %in% top_langs$origina
 lgbtq_colors <- c("#FF0018", "#FFA52C", "#FFFF41", "#008018", "#0000F9", "#86007D", "#8B4513", "#FFD700")
 
 
-title_text <- "Average vote score distribution by Language in LGBTQ+ Movies"
+title_text <- "Average vote score distribution by language in LGBTQ+ Movies"
 
 ggplot(data = lgbtq_movies,aes(x = vote_average,fill = original_language)) + 
   geom_density(alpha =0.9) + 
@@ -282,7 +282,12 @@ lgbtq_movies <- lgbtq_movies %>% mutate(original_lang = case_when(original_langu
 ```{r}
 lgbtq_colors <- c("#FF0018", "#FFA52C", "#FFFF41", "#008018", "#0000F9", "#86007D", "#8B4513", "#FFD700")
 
-subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, <br> making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality.__"
+title_text <- "Average vote score distribution by language in LGBTQ+ Movies"
+
+
+subtitle_text <- "Visualizing the average vote scores across LGBTQ+ categorized movies based on their respective languages reveals <br> an intriguing pattern. The overall distribution of vote scores appears to be <strong><span style='color: darkred;'>bimodal</span></strong>, with noticeable peaks at scores <br> of 0 and 6. This suggests that viewers tend to either strongly dislike these movies or find them to be average. <br> Additionally, it's interesting to note that <strong> English-language </strong> movies exhibit a higher frequency of low scores compared <br> to movies in other languages. This may indicate differing audience preferences or varying production quality <br> across different language groups."
+
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #ggplot2")
 
 lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) + 
   geom_density_ridges(aes(fill = factor(original_lang)), color = "grey30", linewidth = .25, alpha = .9) +
@@ -291,7 +296,8 @@ lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) +
   labs(x = "Average Vote Score",
        y="",
        title = title_text,
-       subtitle = subtitle_text) +
+       subtitle = subtitle_text,
+       caption = caption_text) +
   theme(
     axis.text.y        = element_text(
       size                = rel(1.3),
@@ -318,7 +324,16 @@ lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) +
       hjust               = 0,
       lineheight          = 1.4, 
       margin              = margin(t = 5, b = 1)
-    ))
+    ),
+    plot.caption          = element_markdown(
+      size                = rel(0.5), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.6,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    )) 
 ```
 
 
