@@ -66,7 +66,7 @@ lgbtq_movies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascien
 ```{r}
 lgbtq_movies
 
-top_langs <- lgbtq_movies %>% group_by(original_language) %>% summarise(Total = n()) %>% filter(Total > 100)
+top_langs <- lgbtq_movies %>% group_by(original_language) %>% summarise(Total = n()) %>% arrange(-Total) %>% head(8)
 lgbtq_movies <- lgbtq_movies %>% filter(original_language %in% top_langs$original_language)
 ```
 
@@ -81,10 +81,16 @@ ggplot(data = top_langs,aes(x = original_language, y = Total)) + geom_col()
 
 ```{r}
 
-ggplot(data = lgbtq_movies,aes(x = vote_average)) + 
-  geom_density(fill = "red",alpha =0.5) + 
+
+lgbtq_colors <- c("#FF0018", "#FFA52C", "#FFFF41", "#008018", "#0000F9", "#86007D", "#8B4513", "#FFD700")
+
+
+ggplot(data = lgbtq_movies,aes(x = vote_average,fill = original_language)) + 
+  geom_density(alpha =0.9) + 
+  scale_fill_manual(values = lgbtq_colors) +
   facet_wrap(~original_language,
-             nrow = 2)
+             ncol = 2) +
+  labs(x = "Average Vote Score",y="")
 
 ```
 

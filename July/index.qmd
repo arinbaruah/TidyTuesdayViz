@@ -139,7 +139,7 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 
 
 # plot colors
-bkg_col      <- colorspace::lighten("cornsilk", 0.05)    
+bkg_col      <- colorspace::lighten("white", 0.05)    
 title_col    <- "#3d3d3d"           
 subtitle_col <- "#3d3d3d"     
 caption_col  <- "#72647D"   
@@ -663,6 +663,7 @@ treemap_plot <- treemap(
   border.col = "gray", # Border color of the tiles
   draw = TRUE
 ) 
+
 
 ```
 
