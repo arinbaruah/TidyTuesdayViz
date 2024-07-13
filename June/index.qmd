@@ -289,7 +289,7 @@ subtitle_text <- "Visualizing the average vote scores across LGBTQ+ categorized 
 
 caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #ggplot2")
 
-lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) + 
+pl <- lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) + 
   geom_density_ridges(aes(fill = factor(original_lang)), color = "grey30", linewidth = .25, alpha = .9) +
   scale_fill_manual(values = lgbtq_colors) +
   geom_vline(xintercept = c(0,5,10), linewidth = .3, linetype = "dotted", lineend = "round",alpha = 0.5) +
@@ -299,8 +299,27 @@ lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) +
        subtitle = subtitle_text,
        caption = caption_text) +
   theme(
-    axis.text.y        = element_text(
-      size                = rel(1.3),
+    
+     axis.text.x        = element_text(
+      size                = rel(1.5),
+      family              = "text",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),
+    axis.text        = element_text(
+      size                = rel(1.8),
+      family              = "text",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),
+    axis.title        = element_text(
+      size                = rel(1.5),
       family              = "text",
       face                = "bold",
       color               = title_col,
@@ -309,7 +328,7 @@ lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) +
       hjust               = 0.5
     ),
     plot.title        = element_text(
-      size                = rel(1.3),
+      size                = rel(4),
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -318,15 +337,15 @@ lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) +
       hjust               = 0.5
     ),
     plot.subtitle         = element_markdown(
-      size                = rel(0.66), 
+      size                = rel(2), 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
-      lineheight          = 1.4, 
+      lineheight          = 0.4, 
       margin              = margin(t = 5, b = 1)
     ),
     plot.caption          = element_markdown(
-      size                = rel(0.5), 
+      size                = rel(1.5), 
       family              = 'caption',
       color               = caption_col,
       lineheight          = 0.6,
@@ -334,6 +353,8 @@ lgbtq_movies %>% ggplot(aes(vote_average,original_lang)) +
       halign              = 0,
       margin              = margin(t = 10, b = 10)
     )) 
+pl
+ggsave("lgbtq_density_plot.png", plot = pl)
 ```
 
 
