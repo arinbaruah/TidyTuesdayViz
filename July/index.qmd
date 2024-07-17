@@ -139,7 +139,7 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 
 
 # plot colors
-bkg_col      <- colorspace::lighten("white", 0.05)    
+bkg_col      <- colorspace::lighten("#FFA089", 0.05)    
 title_col    <- "#3d3d3d"           
 subtitle_col <- "#3d3d3d"     
 caption_col  <- "#72647D"   
@@ -703,22 +703,150 @@ ggplot(data = ewf_standings,aes(x = goals_for,y = goals_against,text = team_name
              color = "gold",size =3) 
 ```
 
+
+
+```{r theme}
+
+library(tidyverse)
+library(stringr)
+library(glue)
+library(ggrepel)
+library(ggplot2)
+library(ggtext)
+library(sysfonts)
+library(showtext)
+
+
+# caption handles
+swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
+li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
+gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
+mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
+
+
+# plot colors
+bkg_col      <- colorspace::lighten("#93CCEA", 0.05)    
+title_col    <- "#3d3d3d"           
+subtitle_col <- "#3d3d3d"     
+caption_col  <- "#72647D"   
+text_col     <- colorspace::darken("gray40" , 0.2)  
+
+# fonts
+
+font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
+font_add_google("Oswald", regular.wt = 400, family = "title")                 
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "subtitle")  
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
+font_add_google("Merriweather", regular.wt = 400,family = "caption")
+showtext_auto(enable = TRUE)  
+
+# Plot texts
+
+title_text <- "Understanding Dataset Dimensionality \n Across TidyTuesdayR: A Visual Exploration"
+
+subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality__"
+
+
+X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
+
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #ggplot2")
+
+theme_set(theme_minimal(base_size = 15, base_family = "text"))                
+
+# Theme updates
+
+theme_update(
+  plot.title.position   = "plot",
+  plot.caption.position = "plot",
+  legend.position       = 'plot',
+  plot.margin           = margin(t = 10, r = 15, b = 0, l = 15),
+  plot.background       = element_rect(fill = bkg_col, color = bkg_col),
+  panel.background      = element_rect(fill = bkg_col, color = bkg_col),
+  axis.title.x          = element_text(margin = margin(10, 0, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.title.y          = element_text(margin = margin(0, 10, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.text             = element_text(size = 10, color = text_col, family = 'text',face = "bold"),
+  panel.grid.minor.y    = element_blank(),
+  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'gray40'),
+  panel.grid.minor.x    = element_blank(),
+  panel.grid.major.x    = element_blank(),
+  axis.line.x           = element_line(color = "#d7d7d8", linewidth = .2),
+)
+
+ 
+
+```
+
+
+
 ```{r}
 # Ensure ggplot2 and ggrepel are loaded
 library(ggplot2)
 library(ggrepel)
 
-# Create a new column to distinguish between general points and highlighted points
-ewf_standings$highlight <- ifelse(ewf_standings$position == 1, "Top Position", "Other Teams")
+
+title_text <- "How do the goals scored and conceded vary for \n those at the top of the table and the bottom?"
+ewf_standings <- ewf_standings %>% mutate(Status = case_when(position == 1 ~ "Champions",
+                                                              season_outcome == "Relegated to tier 2" ~ "Relegations",
+                                                             .default = "All other teams"))
 
 # Create the plot
 ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = team_name)) +
-  geom_point(aes(color = highlight), size = 3) + 
-  geom_label_repel(data = filter(ewf_standings, position == 1),
-                   aes(label = team_name), size = 3, nudge_x = 7, nudge_y = 6) +
-  scale_color_manual(values = c("Top Position" = "gold", "Other Teams" = "gray"),
-                     name = "Team Position") +
-  theme_minimal()
+  geom_point(aes(color = Status), size = 1) + geom_point(data = filter(ewf_standings, Status == "Relegations"),
+                                                         aes(color = Status), size = 4) +
+  geom_point(data = filter(ewf_standings, Status == "Champions"),
+                                                         aes(color = Status),size = 4) +
+  geom_label_repel(data = filter(ewf_standings, Status == "Relegations"),
+                   aes(label = team_name), size =2, nudge_x = -7, nudge_y = 18) +
+    geom_label_repel(data = filter(ewf_standings, Status == "Champions"),
+                   aes(label = team_name), size = 2, nudge_x = 7, nudge_y = 9) +
+  scale_color_manual(values = c("Champions" = "gold", "Relegations" = "darkred","All other teams" = "gray"),
+                     name = "Season outcome") +
+  labs(caption = caption_text,
+       x = "Goals scored",
+       y = "Goals conceded",
+       title = title_text) +
+   theme(legend.position = "top",
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = 9,
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = 10,
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(1.3),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.8), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 1.4, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.6), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.6,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    )
+  ) 
 ```
 
 
