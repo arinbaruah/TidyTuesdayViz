@@ -685,4 +685,42 @@ ewf_standings <- readr::read_csv(
 )
 ```
 
+```{r}
+
+top_ewf <-  ewf_standings %>% filter(tier == 1)
+top_ewf %>% ggplot(aes(x = points)) + geom_density() + facet_wrap(~season)
+```
+
+```{r}
+
+library(ggrepel)
+winners <- ewf_standings %>% filter(position == 1)
+
+ggplot(data = ewf_standings,aes(x = goals_for,y = goals_against,text = team_name)) + geom_point(color = "gray") + 
+  geom_label_repel(data = filter(ewf_standings, position == 1),
+                   aes(label = team_name),size = 3,nudge_x = 7,nudge_y = 6) +
+  geom_point(data = filter(ewf_standings, position == 1), 
+             color = "gold",size =3) 
+```
+
+```{r}
+# Ensure ggplot2 and ggrepel are loaded
+library(ggplot2)
+library(ggrepel)
+
+# Create a new column to distinguish between general points and highlighted points
+ewf_standings$highlight <- ifelse(ewf_standings$position == 1, "Top Position", "Other Teams")
+
+# Create the plot
+ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = team_name)) +
+  geom_point(aes(color = highlight), size = 3) + 
+  geom_label_repel(data = filter(ewf_standings, position == 1),
+                   aes(label = team_name), size = 3, nudge_x = 7, nudge_y = 6) +
+  scale_color_manual(values = c("Top Position" = "gold", "Other Teams" = "gray"),
+                     name = "Team Position") +
+  theme_minimal()
+```
+
+
+
 
