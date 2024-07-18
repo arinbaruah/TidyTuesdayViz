@@ -734,8 +734,8 @@ text_col     <- colorspace::darken("gray40" , 0.2)
 # fonts
 
 font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
-font_add_google("Oswald", regular.wt = 400, family = "title")                 
-font_add_google("Quattrocento Sans", regular.wt = 400, family = "subtitle")  
+font_add_google("DM Serif Display", regular.wt = 400, family = "title")                 
+font_add_google("Urbanist", regular.wt = 400, family = "subtitle")  
 font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
 font_add_google("Merriweather", regular.wt = 400,family = "caption")
 showtext_auto(enable = TRUE)  
@@ -784,7 +784,11 @@ library(ggplot2)
 library(ggrepel)
 
 
-title_text <- "How do the goals scored and conceded vary for \n those at the top and bottom of the table?"
+title_text <- "How do the goals scored and conceded vary for \n those at the top and bottom of the table in Women's EFL?"
+
+subtitle_text <- "<span style='color: #496250;'>Analyzing the number of goals scored and conceded by each participating Women’s English Football Club between 2011 and 2023 reveals a compelling picture of <br> contrasting performances in front of the goal. Championship-winning teams consistently demonstrated strong defenses, <strong> with none conceding more than 20 goals <br> in a season </strong>. However, the number of goals scored by these champions varied widely, ranging from 20 to 100 goals. This suggests that a <strong> solid defense is a more <br> significant contributor to championship success than a high-scoring offense </span>.</strong>
+
+<span style='color: darkred;'>Conversely, for clubs relegated to lower divisions, <strong> none scored more than 25 goals in a season </strong>, while the number of goals conceded ranged from 20 to 75.<br> This indicates that for teams at the bottom of the table, offensive struggles are more detrimental than defensive issues. In summary, as we move lower in the <br> standings, <strong> offensive performance becomes increasingly critical compared to defensive solidity.</span> </strong>"
 ewf_standings <- ewf_standings %>% mutate(Status = case_when(position == 1 ~ "Champions",
                                                               season_outcome == "Relegated to tier 2" ~ "Relegations",
                                                              .default = "All other teams"))
@@ -807,7 +811,7 @@ pl <- ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = 
     aes(label = team_name),
     size = rel(5),
     nudge_x = -10,
-    nudge_y = 18,
+    nudge_y = 20,
     fontface = "bold"
   ) +
   geom_text_repel(
@@ -840,7 +844,8 @@ pl <- ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = 
   labs(caption = caption_text,
        x = "Goals scored",
        y = "Goals conceded",
-       title = title_text) +
+       title = title_text,
+       subtitle = subtitle_text) +
    theme(legend.position = "top",
     legend.title.position = "top",
     legend.title = element_text(
@@ -866,11 +871,11 @@ pl <- ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = 
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(0.8), 
+      size                = rel(2), 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
-      lineheight          = 1.4, 
+      lineheight          = 0.2, 
       margin              = margin(t = 5, b = 1)
     ),
       plot.caption          = element_markdown(
