@@ -725,7 +725,7 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 
 
 # plot colors
-bkg_col      <- colorspace::lighten("#93CCEA", 0.05)    
+bkg_col      <- colorspace::lighten("#e3d5eb", 0.05)    
 title_col    <- "#3d3d3d"           
 subtitle_col <- "#3d3d3d"     
 caption_col  <- "#72647D"   
@@ -784,14 +784,14 @@ library(ggplot2)
 library(ggrepel)
 
 
-title_text <- "How do the goals scored and conceded vary for \n those at the top of the table and the bottom?"
+title_text <- "How do the goals scored and conceded vary for \n those at the top and bottom of the table?"
 ewf_standings <- ewf_standings %>% mutate(Status = case_when(position == 1 ~ "Champions",
                                                               season_outcome == "Relegated to tier 2" ~ "Relegations",
                                                              .default = "All other teams"))
 note_text <- "Most dominant champion"
 
 # Create the plot
-ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = team_name)) +
+pl <- ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = team_name)) +
   geom_point(aes(color = Status), size = 1) + geom_point(
     data = filter(ewf_standings, Status == "Relegations"),
     aes(color = Status),
@@ -805,7 +805,7 @@ ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = team_n
   geom_text_repel(
     data = filter(ewf_standings, Status == "Relegations"),
     aes(label = team_name),
-    size = 2,
+    size = rel(5),
     nudge_x = -10,
     nudge_y = 18,
     fontface = "bold"
@@ -813,24 +813,25 @@ ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = team_n
   geom_text_repel(
     data = filter(ewf_standings, Status == "Champions"),
     aes(label = team_name),
-    size = 2,
-    nudge_x = 7,
-    nudge_y = -15,
+    size = rel(5),
+   # nudge_x = 7,
+    #nudge_y = -15,
     fontface = "bold"
   ) +
    geom_richtext(
      aes(
-      x = 100, y = 5,
-      label = note_text
+      x = 75, y = 62,
+      label = note_text,
+      family = "text"
     ),
     vjust = 1.1,
     label.color = NA,
-    size = 3,
+    size = rel(9),
     fill = bkg_col
   ) + 
     geom_curve(
-    aes(x = 100, xend = 95, y = 21, yend = 25),
-    curvature = 0.4,
+    aes(x = 75, xend = 96, y = 50, yend = 12),
+    curvature = 0.2,
     arrow = arrow(length = unit(0.15, "cm"), type = "closed"),
     color = "black"
   ) +
@@ -847,20 +848,20 @@ ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = team_n
       hjust = 0.5,
       family = "text",
       face = "bold",
-      size = 9,
+      size = rel(2.5),
     ),
     legend.text = element_text(
       color = text_col,
       family = "text",
-      size = 10,
+      size = rel(2),
       face = "bold"
     ),
     plot.title            = element_text(
-      size                = rel(1.3),
+      size                = rel(4),
       family              = "title",
       face                = "bold",
       color               = title_col,
-      lineheight          = 1.1,
+      lineheight          = 0.3,
       margin              = margin(t = 5, b = 5),
       hjust               = 0.5
     ),        
@@ -873,15 +874,23 @@ ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = team_n
       margin              = margin(t = 5, b = 1)
     ),
       plot.caption          = element_markdown(
-      size                = rel(0.6), 
+      size                = rel(1.5), 
       family              = 'caption',
       color               = caption_col,
-      lineheight          = 0.6,
+      lineheight          = 0.3,
       hjust               = 0.5,
       halign              = 0,
       margin              = margin(t = 10, b = 10)
+    ),
+    axis.title = element_markdown(
+      size = rel(2.5)
+    ),
+    axis.text  = element_markdown(
+      size = rel(2.5)
     )
   ) 
+
+ggsave("EWF_standings.png",pl,dpi = 300,height = 6, width = 10)
 ```
 
 
