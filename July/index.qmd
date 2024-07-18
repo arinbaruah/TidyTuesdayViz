@@ -788,17 +788,52 @@ title_text <- "How do the goals scored and conceded vary for \n those at the top
 ewf_standings <- ewf_standings %>% mutate(Status = case_when(position == 1 ~ "Champions",
                                                               season_outcome == "Relegated to tier 2" ~ "Relegations",
                                                              .default = "All other teams"))
+note_text <- "Most dominant champion"
 
 # Create the plot
 ggplot(data = ewf_standings, aes(x = goals_for, y = goals_against, text = team_name)) +
-  geom_point(aes(color = Status), size = 1) + geom_point(data = filter(ewf_standings, Status == "Relegations"),
-                                                         aes(color = Status), size = 4) +
-  geom_point(data = filter(ewf_standings, Status == "Champions"),
-                                                         aes(color = Status),size = 4) +
-  geom_label_repel(data = filter(ewf_standings, Status == "Relegations"),
-                   aes(label = team_name), size =2, nudge_x = -7, nudge_y = 18) +
-    geom_label_repel(data = filter(ewf_standings, Status == "Champions"),
-                   aes(label = team_name), size = 2, nudge_x = 7, nudge_y = 9) +
+  geom_point(aes(color = Status), size = 1) + geom_point(
+    data = filter(ewf_standings, Status == "Relegations"),
+    aes(color = Status),
+    size = 4
+  ) +
+  geom_point(
+    data = filter(ewf_standings, Status == "Champions"),
+    aes(color = Status),
+    size = 4
+  ) +
+  geom_text_repel(
+    data = filter(ewf_standings, Status == "Relegations"),
+    aes(label = team_name),
+    size = 2,
+    nudge_x = -10,
+    nudge_y = 18,
+    fontface = "bold"
+  ) +
+  geom_text_repel(
+    data = filter(ewf_standings, Status == "Champions"),
+    aes(label = team_name),
+    size = 2,
+    nudge_x = 7,
+    nudge_y = -15,
+    fontface = "bold"
+  ) +
+   geom_richtext(
+     aes(
+      x = 100, y = 5,
+      label = note_text
+    ),
+    vjust = 1.1,
+    label.color = NA,
+    size = 3,
+    fill = bkg_col
+  ) + 
+    geom_curve(
+    aes(x = 100, xend = 95, y = 21, yend = 25),
+    curvature = 0.4,
+    arrow = arrow(length = unit(0.15, "cm"), type = "closed"),
+    color = "black"
+  ) +
   scale_color_manual(values = c("Champions" = "gold", "Relegations" = "darkred","All other teams" = "gray"),
                      name = "Season outcome") +
   labs(caption = caption_text,
