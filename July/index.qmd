@@ -895,8 +895,6 @@ ggsave("EWF_standings.png",pl,dpi = 300,height = 6, width = 10)
 # 24th July
 
 ```{r}
-
-
 auditions <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-23/auditions.csv')
 eliminations <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-23/eliminations.csv')
 finalists <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-23/finalists.csv')
@@ -918,7 +916,7 @@ negative_result <- c("Disqualified","Bottom","Not Chosen","Bottom three (Males)"
                      "Bottom three (Males)","Bottom two","Bottom Two","Bottom two (Female)",
                      "Bottom two (Males)","Eliminated","Eliminated (6th)","Top 3/Eliminated")
 
-songs <- songs %>% mutate(result_cleaned = if_else(result %in% negative_result,"Negative outcome","Postive outcome"))
+songs <- songs %>% mutate(result_cleaned = if_else(result %in% negative_result,"Negative","Postive"))
 
 
 multiple_apps <- songs %>% group_by(artist) %>% summarise(Total = n()) %>% filter(Total >= 10)
@@ -937,6 +935,9 @@ songs_grouped <- songs_grouped %>%
 ```{r}
 
 ggplot(data = songs_grouped,aes(x = Total, y = artist, fill = result_cleaned)) + 
-  geom_col(position  = "fill") + theme_minimal() 
+  geom_col(position  = "fill",color = "black") + theme_minimal() +
+  labs(fill = "Outcome",
+         x  = "Proportion of songs",
+         y  =  " Artist's song performed")
 ```
 
