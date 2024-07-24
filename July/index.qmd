@@ -911,4 +911,12 @@ finalists
 ```
 
 
+```{r}
+
+negative_result <- c("Disqualified","Bottom","Not Chosen","Bottom three (Males)","Bottom 2",
+                     "Bottom 3","Bottom three","Bottom Three","Bottom three (Female)","Bottom three (Males)","Bottom two","Bottom Two","Bottom two (Female)","Bottom two (Males)","Eliminated","Eliminated (6th)","Top 3/Eliminated")
+
+songs <- songs %>% mutate(result_cleaned = if_else(result %in% negative_result,"Negative outcome","Postive outcome"))
+
+```
 
