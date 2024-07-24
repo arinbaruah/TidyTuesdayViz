@@ -914,9 +914,29 @@ finalists
 ```{r}
 
 negative_result <- c("Disqualified","Bottom","Not Chosen","Bottom three (Males)","Bottom 2",
-                     "Bottom 3","Bottom three","Bottom Three","Bottom three (Female)","Bottom three (Males)","Bottom two","Bottom Two","Bottom two (Female)","Bottom two (Males)","Eliminated","Eliminated (6th)","Top 3/Eliminated")
+                     "Bottom 3","Bottom three","Bottom Three","Bottom three (Female)",
+                     "Bottom three (Males)","Bottom two","Bottom Two","Bottom two (Female)",
+                     "Bottom two (Males)","Eliminated","Eliminated (6th)","Top 3/Eliminated")
 
 songs <- songs %>% mutate(result_cleaned = if_else(result %in% negative_result,"Negative outcome","Postive outcome"))
 
+
+multiple_apps <- songs %>% group_by(artist) %>% summarise(Total = n()) %>% filter(Total >= 10)
+
+songs_grouped <- songs %>% filter(artist %in% multiple_apps$artist) %>% 
+  group_by(artist,result_cleaned) %>% summarise(Total = n()) 
+
+songs_grouped <- songs_grouped %>%
+  group_by(artist) %>%
+  mutate(Proportion = Total / sum(Total)) %>%
+  ungroup() %>%
+  arrange(-Proportion) %>%
+  mutate(artist = factor(artist, levels = rev(unique(artist))))
+```
+
+```{r}
+
+ggplot(data = songs_grouped,aes(x = Total, y = artist, fill = result_cleaned)) + 
+  geom_col(position  = "fill") + theme_minimal() 
 ```
 
