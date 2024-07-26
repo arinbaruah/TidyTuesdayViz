@@ -34,6 +34,7 @@ library(ggrepel)
 library(FunnelPlotR)
 library(ggfunnel)
 library(waffle)
+library(ggimage)
 ```
 
 
@@ -929,16 +930,16 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 
 
 # plot colors
-bkg_col      <- colorspace::lighten("#e3d5eb", 0.05)    
-title_col    <- "#3d3d3d"           
+bkg_col      <- colorspace::lighten("#1656AD", 0.05)    
+title_col    <- "white"           
 subtitle_col <- "#3d3d3d"     
-caption_col  <- "#72647D"   
-text_col     <- colorspace::darken("gray40" , 0.2)  
+caption_col  <- "#1690FE"   
+text_col     <- colorspace::darken("white" , 0.2)  
 
 # fonts
 
 font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
-font_add_google("DM Serif Display", regular.wt = 400, family = "title")                 
+font_add_google("Poppins", regular.wt = 400, family = "title")                 
 font_add_google("Urbanist", regular.wt = 400, family = "subtitle")  
 font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
 font_add_google("Merriweather", regular.wt = 400,family = "caption")
@@ -985,40 +986,65 @@ negative_result <- c("Disqualified","Bottom","Not Chosen","Bottom three (Males)"
                      "Bottom 3","Bottom three","Bottom Three","Bottom three (Female)",
                      "Bottom three (Males)","Bottom two","Bottom Two","Bottom two (Female)",
                      "Bottom two (Males)","Eliminated","Eliminated (6th)","Top 3/Eliminated")
+winner <- c("Winner")
 
-songs <- songs %>% mutate(result_cleaned = if_else(result %in% negative_result,"Negative","Postive"))
+songs <- songs %>% mutate(result_cleaned = case_when(result %in% negative_result ~ "Eliminated",
+                                                      result %in% winner ~ "Winner",
+                                                      .default = "Progressed"))
 
 
-multiple_apps <- songs %>% group_by(artist) %>% summarise(Total = n()) %>% filter(Total >= 10)
+
+songs <- songs %>% group_by(artist) %>% mutate(Total = n()) %>% filter(Total >= 10)
+
+songs$artist_num <- paste0(
+    songs$artist," (",songs$Total,")"
+)
+
 
 songs_grouped <- songs %>% filter(artist %in% multiple_apps$artist) %>% 
-  group_by(artist,result_cleaned) %>% summarise(Total = n()) 
+  group_by(artist_num,result_cleaned) %>% summarise(Total = n()) 
 
 songs_grouped <- songs_grouped %>%
-  group_by(artist) %>%
+  group_by(artist_num) %>%
   mutate(Proportion = Total / sum(Total)) %>%
   ungroup() %>%
   arrange(-Proportion) %>%
-  mutate(artist = factor(artist, levels = rev(unique(artist))))
+  mutate(artist = factor(artist_num, levels = rev(unique(artist_num))))
 ```
 
 ```{r}
+library("png")
+library(cowplot)
+logo <- readPNG("AmericanIdol.png")
 
-ggplot(data = songs_grouped,aes(x = Total, y = artist, fill = result_cleaned)) + 
-  geom_col(position  = "fill",color = "black") + theme_minimal() + geom_vline (xintercept  = 0.5,linetype = 2) +
+title_text <- "American Idol Hits: Measuring the Success of the highest played Artists"
+
+subtitle_text <- ""
+
+custom_colors <- c("Progressed" = "steelblue", "Eliminated" = "darkred", "Winner" = "gold")
+
+p <- ggplot(data = songs_grouped,aes(x = Total, y = artist, fill = result_cleaned)) + 
+  geom_col(position  = "fill",color = "black") + geom_vline (xintercept  = 0.5,linetype = 2) +
   labs(fill = "Outcome",
          x  = "Proportion of songs",
-         y  =  " Artist's song performed",
+         y  =  " Artist's song performed (N)",
+         title = title_text,
        caption = caption_text) +
   scale_x_continuous(expand = c(0, 0), labels = scales::percent) +
+  scale_fill_manual(values = custom_colors) +
    theme(legend.position = "top",
+         panel.spacing = unit(3, "lines"),
+         panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linewidth = .3, linetype = "dashed", color = "grey50"),
+        plot.margin = margin(20, 20, 20, 20),
     legend.title.position = "top",
     legend.title = element_text(
       color = text_col,
       hjust = 0.5,
       family = "text",
       face = "bold",
-      size = rel(2.5),
+      size = rel(3),
     ),
     legend.text = element_text(
       color = text_col,
@@ -1044,22 +1070,30 @@ ggplot(data = songs_grouped,aes(x = Total, y = artist, fill = result_cleaned)) +
       margin              = margin(t = 5, b = 1)
     ),
       plot.caption          = element_markdown(
-      size                = rel(0.8), 
+      size                = rel(2), 
       family              = 'caption',
       color               = caption_col,
       lineheight          = 0.3,
-      hjust               = 0,
+      hjust               = 0.5,
       halign              = 0,
       margin              = margin(t = 10, b = 10)
     ),
     axis.title = element_markdown(
-      size                = rel(1),
+      size                = rel(3),
       family              = "text"
     ),
-    axis.text  = element_markdown(
-      size = rel(0.6)
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(3),
+      face = "bold"
     )
   ) 
 
+ggsave("American_Idol_success.png",p,dpi = 300,height = 6, width = 10)
+
 ```
+
 
