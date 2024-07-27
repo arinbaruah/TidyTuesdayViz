@@ -932,14 +932,14 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 # plot colors
 bkg_col      <- colorspace::lighten("#1656AD", 0.05)    
 title_col    <- "white"           
-subtitle_col <- "#3d3d3d"     
+subtitle_col <- "white"     
 caption_col  <- "#1690FE"   
 text_col     <- colorspace::darken("white" , 0.2)  
 
 # fonts
 
 font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
-font_add_google("Poppins", regular.wt = 400, family = "title")                 
+font_add_google("Playfair Display", regular.wt = 400, family = "title")                 
 font_add_google("Urbanist", regular.wt = 400, family = "subtitle")  
 font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
 font_add_google("Merriweather", regular.wt = 400,family = "caption")
@@ -997,7 +997,7 @@ songs <- songs %>% mutate(result_cleaned = case_when(result %in% negative_result
 songs <- songs %>% group_by(artist) %>% mutate(Total = n()) %>% filter(Total >= 10)
 
 songs$artist_num <- paste0(
-    songs$artist," (",songs$Total,")"
+    songs$artist," <span style='font-size:18pt; color:gold'>**(",songs$Total,"**)</span>"
 )
 
 
@@ -1019,7 +1019,12 @@ logo <- readPNG("AmericanIdol.png")
 
 title_text <- "American Idol Hits: Measuring the Success of the highest played Artists"
 
-subtitle_text <- ""
+
+subtitle_text <- "Some artists are particularly popular choices for contestants on the American Idol stage. But how does the success rate vary for each artist's songs chosen <br> by the contestants? By studying those artists whose songs have appeared on the show at least 10 times or more (N), we uncover some fascinating statistics.
+
+The top three most popular artists, whose songs were performed the most, are <span style='font-size:30pt; color:gold'><strong>Stevie Wonder, The Beatles, and Elton John.</span></strong>
+
+Diving deeper into the success rate, <span style='font-size:30pt; color:gold'><strong>Dionne Warwick's</span></strong> songs emerge as the ones with the highest success rate, with several performances even by eventual <br> contest winners! This is closely followed by Aerosmith. Additionally, <span style='font-size:30pt; color:gold'><strong>Martina McBride's</span></strong> songs have produced the highest proportion of winners on this list, <br> making her a notable mention."
 
 custom_colors <- c("Progressed" = "steelblue", "Eliminated" = "darkred", "Winner" = "gold")
 
@@ -1029,6 +1034,7 @@ p <- ggplot(data = songs_grouped,aes(x = Total, y = artist, fill = result_cleane
          x  = "Proportion of songs",
          y  =  " Artist's song performed (N)",
          title = title_text,
+        subtitle = subtitle_text,
        caption = caption_text) +
   scale_x_continuous(expand = c(0, 0), labels = scales::percent) +
   scale_fill_manual(values = custom_colors) +
@@ -1083,8 +1089,7 @@ p <- ggplot(data = songs_grouped,aes(x = Total, y = artist, fill = result_cleane
       family              = "text"
     ),
     axis.text.y  = element_markdown(
-      size = rel(2),
-      face = "bold"
+      size = rel(1.8)
     ),
     axis.text.x = element_markdown(
       size = rel(3),
