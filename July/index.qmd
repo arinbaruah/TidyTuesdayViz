@@ -1102,3 +1102,47 @@ ggsave("American_Idol_success.png",p,dpi = 300,height = 6, width = 10)
 ```
 
 
+# July 4th week
+
+```{r}
+
+
+summer_movie_genres <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-30/summer_movie_genres.csv')
+summer_movies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-30/summer_movies.csv')
+```
+```{r}
+
+ggplot(data = summer_movies,aes(x = factor(year),y = average_rating)) + geom_boxplot()
+```
+
+
+```{r}
+summer_movies_number <- summer_movies %>% group_by(year) %>% summarise(Total = n())
+
+ggplot(data = summer_movies_number,aes(x = year,y = Total)) + geom_area()
+```
+```{r}
+ggplot(data = summer_movies,aes(x = average_rating)) + geom_density()
+```
+
+```{r}
+library(ggcirclepack)
+pal <- c(
+  "#911eb4",
+  "#42d4f4",
+  "#fabed4"
+)
+
+cc <- scales::seq_gradient_pal(pal)(seq(0, 1, length.out = 18))
+
+
+ggplot(summer_movies, aes(id = original_title, area = average_rating)) +
+  geom_circlepack() + geom_circlepack_text(aes(label = original_title, color = if_else(num_votes > 2500, "white", "black")), fontface = "bold") 
+#   # geom_circlepack_text(aes(label = str_wrap(original_title, 8),color = if_else(average_rating > 8.5, "white", NA)), family = "text", fontface = "bold", lineheight = 0.7, alpha = 0.8)
+# 
+# ggplot(summer_movies, aes(id = original_title, area = average_rating)) +
+#   geom_circlepack() + 
+#   geom_circlepack_text(aes(label = average_rating, color = if_else(average_rating > 8.5, "white", "black")), fontface = "bold")
+```
+
+
