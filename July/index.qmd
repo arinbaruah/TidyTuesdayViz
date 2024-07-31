@@ -1045,11 +1045,35 @@ summer_movie_cats <- summer_movie_genres %>% group_by(genres) %>% summarise(Tota
 
 cc <- scales::seq_gradient_pal(pal)(seq(0, 1, length.out = 18))
 
-ggplot(summer_movie_cats, aes(id = genres,area = Total)) +
+ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = Total)) +
   geom_circlepack() +
-  geom_circlepack_text(aes(label = genres, family = "text", fontface = "bold")) +
-  geom_circlepack_text(aes(y = after_stat(y - 2), label = str_wrap(Total, 8), family = "text",color = "white", 
-                           fontface = "bold", lineheight = 0.7))
+  geom_circlepack_text(aes(label = genres, family = "title", fontface = "bold",color = "white")) +
+  geom_circlepack_text(aes(y = after_stat(y - 2), label = str_wrap(Total, 8), 
+                           family = "text",color = "white", 
+                           fontface = "bold", lineheight = 0.7)) +
+  scale_color_identity() +
+  scale_fill_gradientn(colors = pal,  na.value = "#D9D9E1") +
+  coord_fixed(clip = "off", expand = FALSE) +
+  theme_void() +
+  labs(caption = caption_text) +
+  theme(
+    legend.position = "none",
+    plot.background = element_rect(fill = "grey99", color = NA),
+    panel.spacing.y = unit(2, "lines"),
+    strip.text = element_text(color = pal[1], size = 10),
+    plot.margin = margin(10, 20, 10, 30),
+    plot.title = element_text(size = 20, face = "bold"),
+    plot.subtitle = element_text(margin = margin(5, 0, 15, 0)),
+    plot.caption          = element_markdown(
+      size                = rel(1), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    )
+  ) 
 
 ```
 
