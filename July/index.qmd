@@ -1001,6 +1001,72 @@ ggsave("American_Idol_success.png",p,dpi = 300,height = 6, width = 10)
 
 # July 4th week
 
+
+```{r theme}
+
+library(tidyverse)
+library(stringr)
+library(glue)
+library(ggrepel)
+library(ggplot2)
+library(ggtext)
+library(sysfonts)
+library(showtext)
+
+
+# caption handles
+swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
+li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
+gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
+mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
+
+
+# plot colors
+bkg_col      <- colorspace::lighten("#CAE7D3", 0.05)    
+title_col    <- "white"           
+subtitle_col <- "white"     
+caption_col  <- "#1690FE"   
+text_col     <- colorspace::darken("white" , 0.2)  
+
+# fonts
+
+font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
+font_add_google("Playfair Display", regular.wt = 400, family = "title")                 
+font_add_google("Urbanist", regular.wt = 400, family = "subtitle")  
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
+font_add_google("Merriweather", regular.wt = 400,family = "caption")
+showtext_auto(enable = TRUE)  
+
+
+X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
+
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #ggplot2")
+
+theme_set(theme_minimal(base_size = 15, base_family = "text"))                
+
+# Theme updates
+
+theme_update(
+  plot.title.position   = "plot",
+  plot.caption.position = "plot",
+  legend.position       = 'plot',
+  plot.margin           = margin(t = 10, r = 15, b = 0, l = 15),
+  plot.background       = element_rect(fill = bkg_col, color = bkg_col),
+  panel.background      = element_rect(fill = bkg_col, color = bkg_col),
+  axis.title.x          = element_text(margin = margin(10, 0, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.title.y          = element_text(margin = margin(0, 10, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.text             = element_text(size = 10, color = text_col, family = 'text',face = "bold"),
+  panel.grid.minor.y    = element_blank(),
+  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'gray40'),
+  panel.grid.minor.x    = element_blank(),
+  panel.grid.major.x    = element_blank(),
+  axis.line.x           = element_line(color = "#d7d7d8", linewidth = .2),
+)
+
+ 
+
+```
+
 ```{r}
 
 
@@ -1033,10 +1099,13 @@ ggplot(data = summer_movies,aes(x = average_rating,y = runtime_minutes)) + geom_
 
 
 ```{r}
+library(zoo)
+
+
 summer_movies_number <- summer_movies_number %>% mutate(yoy = 100*(Total - lag(Total))/(Total))
 
 
-lineplot <- ggplot(data = summer_movies_number,aes(x = year,y = Total)) + geom_line() + geom_smooth()
+lineplot <- ggplot(data = summer_movies_number,aes(x = year,y =rollapply(summer_movies_number$Total, width = 5, FUN = mean, align = "right", fill = NA))) + geom_line() 
 ```
 
 ```{r}
@@ -1058,7 +1127,7 @@ circles <- ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = Total))
   labs(caption = caption_text) +
   theme(
     legend.position = "none",
-    plot.background = element_rect(fill = "grey99", color = NA),
+    plot.background = element_rect(fill = "#CAE7D3", color = NA),
     panel.spacing.y = unit(2, "lines"),
     strip.text = element_text(color = pal[1], size = 10),
     plot.margin = margin(10, 20, 10, 30),
