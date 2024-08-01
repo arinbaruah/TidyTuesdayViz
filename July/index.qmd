@@ -1105,16 +1105,16 @@ library(zoo)
 summer_movies_number <- summer_movies_number %>% mutate(yoy = 100*(Total - lag(Total))/(Total))
 
 
-lineplot <- ggplot(data = summer_movies_number,aes(x = year,y =rollapply(summer_movies_number$Total, width = 5, FUN = mean, align = "right", fill = NA))) + geom_line() 
+lineplot <- ggplot(data = summer_movies_number,aes(x = year,y =rollapply(summer_movies_number$Total, width = 5, FUN = mean, align = "right", fill = NA))) + geom_area() 
 ```
 
 ```{r}
 library(patchwork)
-summer_movie_cats <- summer_movie_genres %>% group_by(genres) %>% summarise(Total = n())
+summer_movie_cats <- summer_movie_genres %>% group_by(genres) %>% summarise(Total = n()) %>% mutate(top_genre = if_else(Total > 100,"Yes","No"))
 
 cc <- scales::seq_gradient_pal(pal)(seq(0, 1, length.out = 18))
 
-circles <- ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = Total)) +
+circles <- ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = top_genre)) +
   geom_circlepack() +
   geom_circlepack_text(aes(label = genres, family = "title", fontface = "bold",color = "white")) +
   geom_circlepack_text(aes(y = after_stat(y - 2), label = str_wrap(Total, 4), 
