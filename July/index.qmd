@@ -1019,7 +1019,7 @@ summer_movies_number <- summer_movies %>% group_by(year) %>% summarise(Total = n
 ggplot(data = summer_movies_number,aes(x = year,y = Total)) + geom_line() + geom_smooth()
 ```
 ```{r}
-ggplot(data = summer_movies,aes(x = average_rating)) + geom_histogram()
+hist <- ggplot(data = summer_movies,aes(x = average_rating)) + geom_histogram()
 ```
 
 ```{r}
@@ -1029,7 +1029,6 @@ ggplot(data = summer_movies,aes(y = factor(year),x = runtime_minutes)) + geom_bo
 
 ggplot(data = summer_movies,aes(x = average_rating,y = runtime_minutes)) + geom_hex()
 
-ggplot(data = summer_movies %>% filter(num_votes < 200000),aes(x = runtime_minutes,y = num_votes,colour = is_top)) + geom_point()
 ```
 
 
@@ -1037,18 +1036,19 @@ ggplot(data = summer_movies %>% filter(num_votes < 200000),aes(x = runtime_minut
 summer_movies_number <- summer_movies_number %>% mutate(yoy = 100*(Total - lag(Total))/(Total))
 
 
-ggplot(data = summer_movies_number,aes(x = year,y = Total)) + geom_line() + geom_smooth()
+lineplot <- ggplot(data = summer_movies_number,aes(x = year,y = Total)) + geom_line() + geom_smooth()
 ```
 
 ```{r}
+library(patchwork)
 summer_movie_cats <- summer_movie_genres %>% group_by(genres) %>% summarise(Total = n())
 
 cc <- scales::seq_gradient_pal(pal)(seq(0, 1, length.out = 18))
 
-ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = Total)) +
+circles <- ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = Total)) +
   geom_circlepack() +
   geom_circlepack_text(aes(label = genres, family = "title", fontface = "bold",color = "white")) +
-  geom_circlepack_text(aes(y = after_stat(y - 2), label = str_wrap(Total, 8), 
+  geom_circlepack_text(aes(y = after_stat(y - 2), label = str_wrap(Total, 4), 
                            family = "text",color = "white", 
                            fontface = "bold", lineheight = 0.7)) +
   scale_color_identity() +
@@ -1074,6 +1074,15 @@ ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = Total)) +
       margin              = margin(t = 10, b = 10)
     )
   ) 
+
+
+(lineplot + hist) / circles +
+  plot_layout(nrow=2, heights = c(4,10)) &
+  theme(plot.margin = unit(c(0.2,0.2,0.2,0.2), "cm")) &
+  plot_annotation(
+    theme = theme(plot.background = element_rect(color = "white", size = 2, fill = "white"),
+                  strip.background = element_rect(color = "white"))
+  )
 
 ```
 
