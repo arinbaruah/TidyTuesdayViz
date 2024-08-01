@@ -492,7 +492,7 @@ drob_funs_grouped <- drob_funs_grouped %>%
   ungroup()
 
 # Create a new column to indicate whether a value should be labeled
-drob_funs_grouped <- drob_funs_grouped %>%
+drob_funs_grouped <- drob_funs_grouped %>%s
   mutate(label = ifelse(max_total, as.character(funs), ""))
 
 # Define a pastel color palette
@@ -1085,7 +1085,18 @@ summer_movies_number <- summer_movies %>% group_by(year) %>% summarise(Total = n
 ggplot(data = summer_movies_number,aes(x = year,y = Total)) + geom_line() + geom_smooth()
 ```
 ```{r}
-hist <- ggplot(data = summer_movies,aes(x = average_rating)) + geom_histogram()
+hist <- ggplot(data = summer_movies,aes(x = average_rating)) + geom_histogram() + 
+  geom_vline(xintercept = mean(summer_movies$average_rating),
+             color = "darkred",linetype = 3,linewidth = 2) +
+  annotate(geom = "text",
+           x = 4,
+           y = 50,
+           label = paste0("Average rating:",round(mean(summer_movies$average_rating)),1),
+           size = 4,
+           fontface = "bold",
+           family = "caption")
+  
+
 ```
 
 ```{r}
@@ -1104,15 +1115,98 @@ library(zoo)
 
 summer_movies_number <- summer_movies_number %>% mutate(yoy = 100*(Total - lag(Total))/(Total))
 
+summer_movies_number <- summer_movies_number %>%
+  mutate(roll_mean = rollapply(Total, width = 5, FUN = mean, align = "right", fill = NA))
 
-lineplot <- ggplot(data = summer_movies_number,aes(x = year,y =rollapply(summer_movies_number$Total, width = 5, FUN = mean, align = "right", fill = NA))) + geom_area() 
+
+lineplot <- ggplot(data = summer_movies_number,aes(x = year,y = roll_mean)) + geom_line() +
+  geom_point(
+    data = filter(summer_movies_number,year == 1995),
+    size = 5,
+    color = "darkred"
+  ) +
+    geom_segment(aes(x = 1995,
+                   y = 8,
+                   xend = 1990,
+                   yend = 18),
+               size = 1) +
+  annotate(geom = "text",
+           x = 1980,
+           y = 20,
+           label = 'Exponential rise \n in "summer movies" after 1995',
+           fontface = "bold",
+           family = "text") +
+  labs(x = "Year",
+       y = "Movies  released") +
+   theme(legend.position = "top",
+         panel.spacing = unit(3, "lines"),
+         panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linewidth = .3, linetype = "dashed", color = "grey50"),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3),
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(4),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.2, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(1.8)
+    ),
+    axis.text.x = element_markdown(
+      size = rel(3),
+      face = "bold"
+    )
+  ) 
+
+
+lineplot
 ```
 
 ```{r}
 library(patchwork)
+library(ggcirclepack)
 summer_movie_cats <- summer_movie_genres %>% group_by(genres) %>% summarise(Total = n()) %>% mutate(top_genre = if_else(Total > 100,"Yes","No"))
 
-cc <- scales::seq_gradient_pal(pal)(seq(0, 1, length.out = 18))
+cc <- c("Yes" = "#5C62D6", "No" = "gray" )
 
 circles <- ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = top_genre)) +
   geom_circlepack() +
@@ -1121,7 +1215,8 @@ circles <- ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = top_gen
                            family = "text",color = "white", 
                            fontface = "bold", lineheight = 0.7)) +
   scale_color_identity() +
-  scale_fill_gradientn(colors = pal,  na.value = "#D9D9E1") +
+  #scale_fill_gradientn(colors = pal,  na.value = "#D9D9E1") +
+  scale_fill_manual(values = cc) +
   coord_fixed(clip = "off", expand = FALSE) +
   theme_void() +
   labs(caption = caption_text) +
