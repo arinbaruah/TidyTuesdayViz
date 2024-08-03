@@ -22,3 +22,10 @@ This repository contains all the visualisation entries to TidyTuesday challenges
 # 19th July
 
 ![](https://github.com/arinbaruah/TidyTuesdayViz/blob/main/July/EWF_standings.png)
+
+# 24th July
+![](https://github.com/arinbaruah/TidyTuesdayViz/blob/main/July/American_Idol_success.png)
+
+# 30th July
+
+![](https://github.com/arinbaruah/TidyTuesdayViz/blob/main/July/Summer_movies.png)
