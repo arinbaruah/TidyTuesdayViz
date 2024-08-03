@@ -1022,11 +1022,11 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 
 
 # plot colors
-bkg_col      <- colorspace::lighten("#CAE7D3", 0.05)    
-title_col    <- "white"           
-subtitle_col <- "white"     
-caption_col  <- "#1690FE"   
-text_col     <- colorspace::darken("white" , 0.2)  
+bkg_col      <- colorspace::lighten("#f2b36c", 0.05)    
+title_col    <- "#008080"           
+subtitle_col <- "#2F4F4F"     
+caption_col  <- "#008080"   
+text_col     <- colorspace::darken("black" , 0.2)  
 
 # fonts
 
@@ -1057,7 +1057,7 @@ theme_update(
   axis.title.y          = element_text(margin = margin(0, 10, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
   axis.text             = element_text(size = 10, color = text_col, family = 'text',face = "bold"),
   panel.grid.minor.y    = element_blank(),
-  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'gray40'),
+  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'black'),
   panel.grid.minor.x    = element_blank(),
   panel.grid.major.x    = element_blank(),
   axis.line.x           = element_line(color = "#d7d7d8", linewidth = .2),
@@ -1073,17 +1073,7 @@ theme_update(
 summer_movie_genres <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-30/summer_movie_genres.csv')
 summer_movies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-07-30/summer_movies.csv')
 ```
-```{r}
 
-ggplot(data = summer_movies,aes(x = factor(year),y = average_rating)) + geom_boxplot()
-```
-
-
-```{r}
-summer_movies_number <- summer_movies %>% group_by(year) %>% summarise(Total = n())
-
-ggplot(data = summer_movies_number,aes(x = year,y = Total)) + geom_line() + geom_smooth()
-```
 ```{r}
 hist <- ggplot(data = summer_movies,aes(x = average_rating)) + geom_histogram() + 
   geom_vline(xintercept = mean(summer_movies$average_rating),
@@ -1091,22 +1081,75 @@ hist <- ggplot(data = summer_movies,aes(x = average_rating)) + geom_histogram() 
   annotate(geom = "text",
            x = 4,
            y = 50,
-           label = paste0("Average rating:",round(mean(summer_movies$average_rating)),1),
-           size = 4,
+           label = paste0("Average rating:",round(mean(summer_movies$average_rating),1)),
+           size = 7,
            fontface = "bold",
-           family = "caption")
+           family = "caption") +
+  labs(x = "Average rating",
+       y = "Frequency") +
+  theme(legend.position = "top",
+         panel.spacing = unit(3, "lines"),
+         panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linewidth = .3, linetype = "dashed", color = "grey50"),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3),
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(4),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.2, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(1.8)
+    ),
+    axis.text.x = element_markdown(
+      size = rel(3),
+      face = "bold"
+    )
+  ) 
   
 
 ```
 
-```{r}
-summer_movies %>% group_by(genres) %>% summarise(Total = n()) %>% arrange(-Total)
 
-ggplot(data = summer_movies,aes(y = factor(year),x = runtime_minutes)) + geom_boxplot()
-
-ggplot(data = summer_movies,aes(x = average_rating,y = runtime_minutes)) + geom_hex()
-
-```
 
 
 ```{r}
@@ -1122,7 +1165,7 @@ summer_movies_number <- summer_movies_number %>%
 lineplot <- ggplot(data = summer_movies_number,aes(x = year,y = roll_mean)) + geom_line() +
   geom_point(
     data = filter(summer_movies_number,year == 1995),
-    size = 5,
+    size = 3,
     color = "darkred"
   ) +
     geom_segment(aes(x = 1995,
@@ -1131,9 +1174,10 @@ lineplot <- ggplot(data = summer_movies_number,aes(x = year,y = roll_mean)) + ge
                    yend = 18),
                size = 1) +
   annotate(geom = "text",
-           x = 1980,
+           x = 1950,
            y = 20,
-           label = 'Exponential rise \n in "summer movies" after 1995',
+           size = 6,
+           label = 'Exponential rise in "summer movies" after 1995',
            fontface = "bold",
            family = "text") +
   labs(x = "Year",
@@ -1204,32 +1248,57 @@ lineplot
 ```{r}
 library(patchwork)
 library(ggcirclepack)
+
+
+title_text <- "The rising growth of Summer movies over the years"
+
+subtitle_text <- "The number of summer movies has been rising, with a notable increase observed after 1995. This trend indicates the growing <br> popularity of these films among movie enthusiasts and the advancements in technology that have facilitated the release of multiple movies each year. <br> <br>
+Summer movies tend to be more light-hearted, with the most common genres being <span style='font-size:25pt; color:darkred'><strong>Drama,</strong></span> followed by<span style='font-size:25pt; color:darkred'><strong> Comedy</strong></span>and <br> <span style='font-size:25pt; color:darkred'><strong>Romance </strong> </span>.
+<br> <br>
+On average, the rating of these movies is approximately<span style='font-size:25pt; color:darkred'><strong> 6.3 </strong></span>, with a <span style='font-size:25pt; color:darkred'><strong>left-skewed distribution</strong></span>, suggesting that while some <br> summer movies are highly rated, a significant number receive poor ratings."
+
 summer_movie_cats <- summer_movie_genres %>% group_by(genres) %>% summarise(Total = n()) %>% mutate(top_genre = if_else(Total > 100,"Yes","No"))
 
 cc <- c("Yes" = "#5C62D6", "No" = "gray" )
 
 circles <- ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = top_genre)) +
   geom_circlepack() +
-  geom_circlepack_text(aes(label = genres, family = "title", fontface = "bold",color = "white")) +
-  geom_circlepack_text(aes(y = after_stat(y - 2), label = str_wrap(Total, 4), 
-                           family = "text",color = "white", 
+  geom_circlepack_text(aes(label = genres, family = "title", fontface = "bold",color = "#f1fffe")) +
+  geom_circlepack_text(aes(y = after_stat(y - 1), label = str_wrap(Total, 6), 
+                           family = "text",color = "white",size = 800, 
                            fontface = "bold", lineheight = 0.7)) +
   scale_color_identity() +
-  #scale_fill_gradientn(colors = pal,  na.value = "#D9D9E1") +
+  scale_fill_gradientn(colors = pal,  na.value = "#D9D9E1") +
   scale_fill_manual(values = cc) +
-  coord_fixed(clip = "off", expand = FALSE) +
   theme_void() +
-  labs(caption = caption_text) +
+  labs(caption = caption_text,
+       title = title_text,
+       subtitle = subtitle_text) +
   theme(
     legend.position = "none",
-    plot.background = element_rect(fill = "#CAE7D3", color = NA),
+    plot.background = element_rect(fill = "#f2b36c", color = NA),
     panel.spacing.y = unit(2, "lines"),
-    strip.text = element_text(color = pal[1], size = 10),
+    strip.text = element_text(color = pal[1], size = 3),
     plot.margin = margin(10, 20, 10, 30),
-    plot.title = element_text(size = 20, face = "bold"),
-    plot.subtitle = element_text(margin = margin(5, 0, 15, 0)),
+    plot.title            = element_text(
+      size                = rel(5.5),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.3,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.1, 
+      margin              = margin(t = 5, b = 1)
+    ),
     plot.caption          = element_markdown(
-      size                = rel(1), 
+      size                = rel(2), 
       family              = 'caption',
       color               = caption_col,
       lineheight          = 0.3,
@@ -1240,13 +1309,14 @@ circles <- ggplot(summer_movie_cats, aes(id = genres,area = Total,fill = top_gen
   ) 
 
 
-(lineplot + hist) / circles +
-  plot_layout(nrow=2, heights = c(4,10)) &
-  theme(plot.margin = unit(c(0.2,0.2,0.2,0.2), "cm")) &
+p <- circles/(lineplot + hist) +
+  plot_layout(nrow=2, heights = c(10,3)) &
   plot_annotation(
-    theme = theme(plot.background = element_rect(color = "white", size = 2, fill = "white"),
-                  strip.background = element_rect(color = "white"))
+    theme = theme(plot.background = element_rect(color = "#f2b36c", size = 2, fill = "#f2b36c"),
+                  strip.background = element_rect(color = "#f2b36c"))
   )
+
+ggsave("Summer_movies.png",p,dpi = 300,height = 8, width = 8)
 
 ```
 
