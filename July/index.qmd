@@ -1252,7 +1252,7 @@ library(ggcirclepack)
 
 title_text <- "The rising growth of Summer movies over the years"
 
-subtitle_text <- "The number of summer movies has been rising, with a notable increase observed after 1995. This trend indicates the growing <br> popularity of these films among movie enthusiasts and the advancements in technology that have facilitated the release of multiple movies each year. <br> <br>
+subtitle_text <- "The number of summer movies has been rising, with a notable increase observed after 1995. This trend indicates the growing <br> popularity of these films among movie enthusiasts and the advancements in technology that have facilitated the release of <br> multiple movies each year. <br> <br>
 Summer movies tend to be more light-hearted, with the most common genres being <span style='font-size:25pt; color:darkred'><strong>Drama,</strong></span> followed by<span style='font-size:25pt; color:darkred'><strong> Comedy</strong></span>and <br> <span style='font-size:25pt; color:darkred'><strong>Romance </strong> </span>.
 <br> <br>
 On average, the rating of these movies is approximately<span style='font-size:25pt; color:darkred'><strong> 6.3 </strong></span>, with a <span style='font-size:25pt; color:darkred'><strong>left-skewed distribution</strong></span>, suggesting that while some <br> summer movies are highly rated, a significant number receive poor ratings."
