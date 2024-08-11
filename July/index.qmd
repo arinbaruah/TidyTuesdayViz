@@ -845,7 +845,7 @@ showtext_auto(enable = TRUE)
 
 X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
 
-caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #ggplot2")
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #ggcirclepack #ggplot2")
 
 theme_set(theme_minimal(base_size = 15, base_family = "text"))                
 
@@ -1040,7 +1040,7 @@ showtext_auto(enable = TRUE)
 
 X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
 
-caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #ggplot2")
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #ggcirclepack #ggplot2")
 
 theme_set(theme_minimal(base_size = 15, base_family = "text"))                
 
