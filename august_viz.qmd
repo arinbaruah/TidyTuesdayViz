@@ -40,6 +40,7 @@ library(ggplot2)
 library(ggtext)
 library(sysfonts)
 library(showtext)
+library(ggbump)
 
 
 # caption handles
@@ -114,4 +115,31 @@ olympics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/t
 olympics
 ```
 
+
+
+
+```{r}
+
+medals <- c("Gold","Silver","Bronze")
+total_medals <- olympics %>% filter(medal %in% medals) %>% 
+  group_by(team,year) %>% summarise(total = n()) %>% arrange(-total) %>%
+  mutate(
+    rank = row_number(),
+    label = paste0(team, " (", total, ")")
+    ) %>% 
+  ungroup()
+
+
+
+total_medals
+
+
+```
+```{r}
+
+countries <- c("USA","Soviet Union","China","Australia","Canada")
+
+ggplot(total_medals, aes(x = year, y = rank, group = team, size = if_else(team %in% countries, 1.2, 0.15), color = if_else(team %in% countries, team, NA))) +
+  geom_bump()
+```
 
