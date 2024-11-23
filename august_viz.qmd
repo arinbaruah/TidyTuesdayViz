@@ -137,9 +137,17 @@ total_medals
 ```
 ```{r}
 
-countries <- c("USA","Soviet Union","China","Australia","Canada")
+countries <- c("United States","Soviet Union","China","Australia","Canada","Russia")
 
-ggplot(total_medals, aes(x = year, y = rank, group = team, size = if_else(team %in% countries, 1.2, 0.15), color = if_else(team %in% countries, team, NA))) +
+ggplot(total_medals %>% filter(team %in% countries), aes(x = year, y = rank, group = team, 
+                         color = team)) +
+  scale_y_reverse(breaks = c(1, 10, 20, 30)) +
+  geom_point(shape = 21, fill = "white", stroke = 1.2) +
+  geom_richtext(data = total_medals, aes(x = year, y = 41, label = team, group = 1L), size = 4, family = f1b, lineheight = 1.1, color = "black", label.color = NA, fill = NA) +
+  geom_point () +
+   theme(legend.position = "right") +
+    scale_y_reverse(breaks = c(1, 10, 20, 30)) +
+  scale_size_identity() +
   geom_bump()
 ```
 

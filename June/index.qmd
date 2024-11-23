@@ -149,7 +149,22 @@ tt_datasets_grouped = tt_datasets %>% group_by(year) %>% summarise(Total_dataset
 ggplot(data=tt_datasets_grouped,aes(x = year,y = Total_datasets)) + geom_col()
 
 ```
+```{r}
+pl <- ratio_df %>% drop_na() %>% ggplot(aes(x = year,y = n)) + 
+  geom_col() + facet_wrap(~status) + labs(x = "Year", 
+                                          y = "Number of datasets", 
+                                          title = "Total number of datasets of each type in TidyTuesdayR") + theme_classic()
+ggsave("Tidytuesday.png",pl,dpi = 300,height = 8, width = 8)
+```
 
+
+
+
+```{r}
+
+ratio_df_grouped <- ratio_df %>% group_by(year,status) %>% summarise(total = sum(n))
+ggplot(ratio_df,aes(x = year,))
+```
 
 ```{r theme}
 
