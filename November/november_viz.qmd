@@ -42,7 +42,7 @@ library(sysfonts)
 library(showtext)
 library(ggbump)
 library(gghighlight)
-
+library(MetBrewer)
 
 # caption handles
 swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
@@ -120,14 +120,19 @@ cbp_state
 ```{r}
 
 top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER") %>% 
-  group_by(citizenship) %>% summarise(total = sum(encounter_count)) %>% 
+  group_by(citizenship) %>% summarise(total = sum(encounter_count/10^3)) %>% 
   arrange(-total) %>% head(10)
 
 top_countries <- top_countries_grouped$citizenship
 
 top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER" & citizenship %in% top_countries) %>% 
-  group_by(fiscal_year,citizenship) %>% summarise(total = sum(encounter_count)) %>% 
+  group_by(fiscal_year,citizenship) %>% summarise(total = sum(encounter_count/10^3)) %>% 
   arrange(-total)
+
+custom_palette <- c(
+  "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", 
+  "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
+)
 
 pl1 <- top_countries_grouped %>% 
   ggplot() +
@@ -139,16 +144,15 @@ pl1 <- top_countries_grouped %>%
   geom_line(aes(x=fiscal_year, y=total, color=citizenship)) +
   gghighlight(use_direct_label = FALSE,
               unhighlighted_params = list(colour = alpha("grey85", 1))) +
-  geom_text(data=df1 %>% 
-               group_by(country) %>% 
-               slice_max(date),
-             aes(x=date, y=value, color=country, label = round(value)),
-             hjust = -.5, vjust = .5, size=2.5, fontface="bold") +
-  scale_x_date(date_labels = "%y") +
-  scale_y_continuous(breaks = c(90,95,100,105,110),
-                     labels = c("","","100","","")
-                     ) +
-  #facet_wrap(~ country) +
+  geom_text(data=top_countries_grouped %>% 
+               group_by(citizenship) %>% 
+               slice_max(fiscal_year),
+             aes(x=fiscal_year, y=total, color=citizenship, label = round(total)),
+             hjust = 1, vjust = 2, size=2.5, fontface="bold") +
+  facet_wrap(~ citizenship,nrow = 2) +
+    scale_color_met_d(name="Redon")
+  #scale_color_manual(values = custom_palette)
+
   facet_wrap(~  factor(country, levels=c('USA','China','Japan','Germany', 'UK','France', 'Italy', 'South Korea', 'Australia'))) +
   coord_cartesian(clip = "off") +
   theme(
