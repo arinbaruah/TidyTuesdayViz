@@ -1,0 +1,218 @@
+---
+title: "August TT viz"
+format: html
+---
+
+
+```{r}
+
+library(tidyverse)
+library(tidymodels)
+library(ggplot2)
+library(kableExtra)
+library(caret)
+library(plotROC)
+library(mulgar)
+library(tourr)
+library(GGally)
+library(uwot)
+library(animation)
+library(magick)
+library(ggfortify)
+library(ggrepel)
+library(FunnelPlotR)
+library(ggfunnel)
+library(waffle)
+library(ggimage)
+```
+
+
+
+
+
+```{r theme}
+
+library(tidyverse)
+library(stringr)
+library(glue)
+library(ggrepel)
+library(ggplot2)
+library(ggtext)
+library(sysfonts)
+library(showtext)
+library(ggbump)
+library(gghighlight)
+
+
+# caption handles
+swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
+li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
+gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
+mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
+
+
+# plot colors
+bkg_col      <- colorspace::lighten("white", 0.05)    
+title_col    <- "#3d3d3d"           
+subtitle_col <- "#3d3d3d"     
+caption_col  <- "#72647D"   
+text_col     <- colorspace::darken("gray40" , 0.2)  
+
+# fonts
+
+font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
+font_add_google("Oswald", regular.wt = 400, family = "title")                 
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "subtitle")  
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
+font_add_google("Merriweather", regular.wt = 400,family = "caption")
+showtext_auto(enable = TRUE)  
+
+# Plot texts
+
+title_text <- "Understanding Dataset Dimensionality \n Across TidyTuesdayR: A Visual Exploration"
+
+subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality__"
+
+
+X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
+
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #gg_waffle #ggplot2")
+
+theme_set(theme_minimal(base_size = 15, base_family = "text"))                
+
+# Theme updates
+
+theme_update(
+  plot.title.position   = "plot",
+  plot.caption.position = "plot",
+  legend.position       = 'plot',
+  plot.margin           = margin(t = 10, r = 15, b = 0, l = 15),
+  plot.background       = element_rect(fill = bkg_col, color = bkg_col),
+  panel.background      = element_rect(fill = bkg_col, color = bkg_col),
+  axis.title.x          = element_text(margin = margin(10, 0, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.title.y          = element_text(margin = margin(0, 10, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.text             = element_text(size = 10, color = text_col, family = 'text',face = "bold"),
+  panel.grid.minor.y    = element_blank(),
+  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'gray40'),
+  panel.grid.minor.x    = element_blank(),
+  panel.grid.major.x    = element_blank(),
+  axis.line.x           = element_line(color = "#d7d7d8", linewidth = .2),
+)
+
+ 
+
+```
+
+
+# November 3rd week
+
+```{r}
+cbp_resp <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-26/cbp_resp.csv')
+cbp_state <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-26/cbp_state.csv')
+```
+
+
+```{r}
+cbp_resp
+cbp_state
+```
+
+```{r}
+
+top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER") %>% 
+  group_by(citizenship) %>% summarise(total = sum(encounter_count)) %>% 
+  arrange(-total) %>% head(10)
+
+top_countries <- top_countries_grouped$citizenship
+
+top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER" & citizenship %in% top_countries) %>% 
+  group_by(fiscal_year,citizenship) %>% summarise(total = sum(encounter_count)) %>% 
+  arrange(-total)
+
+pl1 <- top_countries_grouped %>% 
+  ggplot() +
+  #geom_hline(yintercept = 100,linetype="solid", size=.25) +
+    geom_point(data= top_countries_grouped %>% 
+               group_by(citizenship) %>% 
+               slice_max(fiscal_year),
+             aes(x=fiscal_year, y=total, color=citizenship),shape=16) +
+  geom_line(aes(x=fiscal_year, y=total, color=citizenship)) +
+  gghighlight(use_direct_label = FALSE,
+              unhighlighted_params = list(colour = alpha("grey85", 1))) +
+  geom_text(data=df1 %>% 
+               group_by(country) %>% 
+               slice_max(date),
+             aes(x=date, y=value, color=country, label = round(value)),
+             hjust = -.5, vjust = .5, size=2.5, fontface="bold") +
+  scale_x_date(date_labels = "%y") +
+  scale_y_continuous(breaks = c(90,95,100,105,110),
+                     labels = c("","","100","","")
+                     ) +
+  #facet_wrap(~ country) +
+  facet_wrap(~  factor(country, levels=c('USA','China','Japan','Germany', 'UK','France', 'Italy', 'South Korea', 'Australia'))) +
+  coord_cartesian(clip = "off") +
+  theme(
+    axis.title = element_blank(),
+    axis.text = element_text(color="black", size=7),
+    strip.text.x = element_text(face="bold"),
+    plot.title = element_markdown(hjust=.5,size=34, color="black",lineheight=.8, face="bold", margin=margin(20,0,30,0)),
+    plot.subtitle = element_markdown(hjust=.5,size=18, color="black",lineheight = 1, margin=margin(10,0,30,0)),
+    plot.caption = element_markdown(hjust=.5, margin=margin(60,0,0,0), size=8, color="black", lineheight = 1.2),
+    plot.caption.position = "plot",
+    plot.background = element_rect(color="cornsilk", fill="cornsilk"),
+    plot.margin = margin(10,10,10,10),
+    legend.position = "none",
+    legend.title = element_text(face="bold")
+  )
+
+p1
+```
+
+
+```{r}
+
+df1 <- read.csv("https://raw.githubusercontent.com/holtzy/R-graph-gallery/master/DATA/dataConsumerConfidence.csv") %>% 
+  mutate(date=lubridate::my(Time)) %>% 
+  select(-Time) %>% 
+  pivot_longer(!date, names_to = "country", values_to = "value") %>% 
+  na.omit()
+
+p1 <- df1 %>% 
+  ggplot() +
+  geom_hline(yintercept = 100,linetype="solid", size=.25) +
+  geom_point(data=df1 %>% 
+               group_by(country) %>% 
+               slice_max(date),
+             aes(x=date, y=value, color=country),shape=16) +
+  geom_line(aes(x=date, y=value, color=country)) +
+  gghighlight(use_direct_label = FALSE,
+              unhighlighted_params = list(colour = alpha("grey85", 1))) +
+  geom_text(data=df1 %>% 
+               group_by(country) %>% 
+               slice_max(date),
+             aes(x=date, y=value, color=country, label = round(value)),
+             hjust = -.5, vjust = .5, size=2.5, fontface="bold") +
+  scale_x_date(date_labels = "%y") +
+  scale_y_continuous(breaks = c(90,95,100,105,110),
+                     labels = c("","","100","","")
+                     ) +
+  #facet_wrap(~ country) +
+  facet_wrap(~  factor(country, levels=c('USA','China','Japan','Germany', 'UK','France', 'Italy', 'South Korea', 'Australia'))) +
+  coord_cartesian(clip = "off") +
+  theme(
+    axis.title = element_blank(),
+    axis.text = element_text(color="black", size=7),
+    strip.text.x = element_text(face="bold"),
+    plot.title = element_markdown(hjust=.5,size=34, color="black",lineheight=.8, face="bold", margin=margin(20,0,30,0)),
+    plot.subtitle = element_markdown(hjust=.5,size=18, color="black",lineheight = 1, margin=margin(10,0,30,0)),
+    plot.caption = element_markdown(hjust=.5, margin=margin(60,0,0,0), size=8, color="black", lineheight = 1.2),
+    plot.caption.position = "plot",
+    plot.background = element_rect(color="cornsilk", fill="cornsilk"),
+    plot.margin = margin(10,10,10,10),
+    legend.position = "none",
+    legend.title = element_text(face="bold")
+  )
+
+p1
+```
+
