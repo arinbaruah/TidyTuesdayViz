@@ -30,6 +30,22 @@ library(ggimage)
 
 
 
+
+
+# November 3rd week
+
+```{r}
+cbp_resp <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-26/cbp_resp.csv')
+cbp_state <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-26/cbp_state.csv')
+```
+
+
+```{r}
+cbp_resp
+cbp_state
+```
+
+
 ```{r theme}
 
 library(tidyverse)
@@ -49,7 +65,7 @@ swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from Cha
 li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
 gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
 mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
-
+tt <- str_glue("#TidyTuesdayR: November 2024 &bull; Source: US Customs and Border Protection (CBP) <br>") 
 
 # plot colors
 bkg_col      <- colorspace::lighten("white", 0.05)    
@@ -61,22 +77,22 @@ text_col     <- colorspace::darken("gray40" , 0.2)
 # fonts
 
 font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
-font_add_google("Oswald", regular.wt = 400, family = "title")                 
-font_add_google("Quattrocento Sans", regular.wt = 400, family = "subtitle")  
+font_add_google("Roboto", regular.wt = 400, family = "title")                 
+font_add_google("Alegreya", regular.wt = 400, family = "subtitle")  
 font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
 font_add_google("Merriweather", regular.wt = 400,family = "caption")
 showtext_auto(enable = TRUE)  
 
 # Plot texts
 
-title_text <- "Understanding Dataset Dimensionality \n Across TidyTuesdayR: A Visual Exploration"
+title_text <- "<span style='color:darkred'>US authorities recording high border encounters <br> across nationalities (2020-2024)</span>"
 
-subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality__"
+subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been managing record-high encounters with individuals of various nationalities at the U.S. borders. A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern borders reveals that Mexican nationals remain the most frequently encountered. However, this marks the second consecutive decline in encounters involving Mexican citizens. While the numbers for most other nationalities have remained relatively stable, there has been a significant rise in encounters with individuals from Haiti and Venezuela, who were either apprehended for unauthorized border crossings or deemed inadmissible. "
 
 
 X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
 
-caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesday |#rstudio #gg_waffle #ggplot2")
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: US Customs and Border Patrol| #TidyTuesdayR #rstudio #gghighlight #ggplot2")
 
 theme_set(theme_minimal(base_size = 15, base_family = "text"))                
 
@@ -104,20 +120,8 @@ theme_update(
 ```
 
 
-# November 3rd week
 
-```{r}
-cbp_resp <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-26/cbp_resp.csv')
-cbp_state <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-26/cbp_state.csv')
-```
-
-
-```{r}
-cbp_resp
-cbp_state
-```
-
-```{r}
+```{r datawrangle}
 
 top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER") %>% 
   group_by(citizenship) %>% summarise(total = sum(encounter_count/10^3)) %>% 
@@ -129,14 +133,15 @@ top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER" & citizenshi
   group_by(fiscal_year,citizenship) %>% summarise(total = sum(encounter_count/10^3)) %>% 
   arrange(-total)
 
-custom_palette <- c(
-  "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", 
-  "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
-)
+top_countries_grouped$citizenship <- factor(top_countries_grouped$citizenship,levels = top_countries)
+```
 
-pl1 <- top_countries_grouped %>% 
-  ggplot() +
-  #geom_hline(yintercept = 100,linetype="solid", size=.25) +
+```{r viz}
+
+subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been managing record-high encounters with individuals of various nationalities at the borders. <br> A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern borders reveals that Mexican nationals remain <br> the most frequently encountered. However, this marks the second consecutive decline in encounters involving Mexican citizens. While the numbers <br> for most other nationalities have remained relatively stable, there has been a <strong> significant rise in encounters with individuals from Haiti and <br> Venezuela, who were either apprehended for unauthorized border crossings or deemed inadmissible. </strong> "
+
+pl1 <- ggplot(data = top_countries_grouped) +
+    geom_hline(aes(yintercept = mean(total)),linetype="solid", size=.25) +
     geom_point(data= top_countries_grouped %>% 
                group_by(citizenship) %>% 
                slice_max(fiscal_year),
@@ -147,29 +152,81 @@ pl1 <- top_countries_grouped %>%
   geom_text(data=top_countries_grouped %>% 
                group_by(citizenship) %>% 
                slice_max(fiscal_year),
-             aes(x=fiscal_year, y=total, color=citizenship, label = round(total)),
-             hjust = 1, vjust = 2, size=2.5, fontface="bold") +
-  facet_wrap(~ citizenship,nrow = 2) +
-    scale_color_met_d(name="Redon") + theme_minimal()
-  #scale_color_manual(values = custom_palette)
+             aes(x=fiscal_year, y=total, color= citizenship, label = round(total)),
+             hjust = 1, vjust = -1.5, size=2, fontface="bold") +
+  facet_wrap(~factor(citizenship,levels = top_countries),nrow = 2) +
+  labs(title = title_text,
+       subtitle = subtitle_text,
+       caption = caption_text,
+       x = "Fiscal year",
+       y = "Total number of encounters (in 100,000)") +
+    scale_color_met_d(name="Redon") + theme_minimal() +
+    theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linewidth = .3, linetype = "dashed", color = "grey50"),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(2),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.8), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.4, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.7), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(0.6)
+    ),
+    axis.title = element_markdown(
+      size                = rel(0.5),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(0.8)
+    ),
+    axis.text.x = element_markdown(
+      size = rel(0.6),
+      face = "bold"
+    )
+  ) 
+  
+pl1
 
-  facet_wrap(~  factor(country, levels=c('USA','China','Japan','Germany', 'UK','France', 'Italy', 'South Korea', 'Australia'))) +
-  coord_cartesian(clip = "off") +
-  theme(
-    axis.title = element_blank(),
-    axis.text = element_text(color="black", size=7),
-    strip.text.x = element_text(face="bold"),
-    plot.title = element_markdown(hjust=.5,size=34, color="black",lineheight=.8, face="bold", margin=margin(20,0,30,0)),
-    plot.subtitle = element_markdown(hjust=.5,size=18, color="black",lineheight = 1, margin=margin(10,0,30,0)),
-    plot.caption = element_markdown(hjust=.5, margin=margin(60,0,0,0), size=8, color="black", lineheight = 1.2),
-    plot.caption.position = "plot",
-    plot.background = element_rect(color="cornsilk", fill="cornsilk"),
-    plot.margin = margin(10,10,10,10),
-    legend.position = "none",
-    legend.title = element_text(face="bold")
-  )
+ggsave("US_Border_encounter.jpeg",plot = pl1,width =8, height = 5)
 
-p1
 ```
 
 
@@ -195,7 +252,7 @@ p1 <- df1 %>%
                group_by(country) %>% 
                slice_max(date),
              aes(x=date, y=value, color=country, label = round(value)),
-             hjust = -.5, vjust = .5, size=2.5, fontface="bold") +
+             hjust = -.5, vjust = 2, size=rel(0.5), fontface="bold") +
   scale_x_date(date_labels = "%y") +
   scale_y_continuous(breaks = c(90,95,100,105,110),
                      labels = c("","","100","","")
@@ -217,6 +274,6 @@ p1 <- df1 %>%
     legend.title = element_text(face="bold")
   )
 
-p1
+
 ```
 
