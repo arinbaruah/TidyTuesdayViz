@@ -29,3 +29,6 @@ This repository contains all the visualisation entries to TidyTuesday challenges
 # 30th July
 
 ![](https://github.com/arinbaruah/TidyTuesdayViz/blob/main/July/Summer_movies.png)
+
+# 25th November
+![](https://github.com/arinbaruah/TidyTuesdayViz/blob/main/November/US_Border_encounter.jpeg)
