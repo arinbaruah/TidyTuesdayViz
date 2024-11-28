@@ -138,7 +138,7 @@ top_countries_grouped$citizenship <- factor(top_countries_grouped$citizenship,le
 
 ```{r viz}
 
-subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been managing record-high encounters with individuals of various nationalities at the borders. <br> A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern borders reveals that Mexican nationals remain <br> the most frequently encountered. However, this marks the second consecutive decline in encounters involving Mexican citizens. While the numbers <br> for most other nationalities have remained relatively stable, there has been a <strong> significant rise in encounters with individuals from Haiti and <br> Venezuela, who were either apprehended for unauthorized border crossings or deemed inadmissible. </strong> "
+subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been handling an average of <strong>approximately 178,000 encounters annually </strong> with individuals of <br> various nationalities at the U.S. borders. A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern <br> borders reveals that <span style='color:steelblue'><strong>Mexican</strong></span> nationals remain the most frequently encountered. However, this marks the second consecutive decline in encounters <br> involving Mexican citizens. While the numbers for most other nationalities have remained relatively stable, there has been a <strong> significant rise in <br> encounters </strong> with individuals from <span style='color:#cc5200'><strong>Haiti</strong></span> and <span style='color:#004d00'><strong>Venezuela</strong></span>, who were either apprehended for unauthorized border crossings or deemed inadmissible.  "
 
 pl1 <- ggplot(data = top_countries_grouped) +
     geom_hline(aes(yintercept = mean(total)),linetype="solid", size=.25) +
@@ -159,7 +159,7 @@ pl1 <- ggplot(data = top_countries_grouped) +
        subtitle = subtitle_text,
        caption = caption_text,
        x = "Fiscal year",
-       y = "Total number of encounters (in 100,000)") +
+       y = "Total number of encounters (in 1000s)") +
     scale_color_met_d(name="Redon") + theme_minimal() +
     theme(legend.position = "none",
         panel.spacing = unit(3, "lines"),
@@ -182,24 +182,24 @@ pl1 <- ggplot(data = top_countries_grouped) +
       face = "bold"
     ),
     plot.title            = element_markdown(
-      size                = rel(2),
+      size                = rel(4),
       family              = "title",
       face                = "bold",
       color               = title_col,
-      lineheight          = 1,
+      lineheight          = 0.5,
       margin              = margin(t = 5, b = 5),
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(0.8), 
+      size                = rel(2), 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
-      lineheight          = 0.4, 
+      lineheight          = 0.5, 
       margin              = margin(t = 5, b = 1)
     ),
       plot.caption          = element_markdown(
-      size                = rel(0.7), 
+      size                = rel(1.5), 
       family              = 'caption',
       color               = caption_col,
       lineheight          = 0.3,
@@ -208,17 +208,20 @@ pl1 <- ggplot(data = top_countries_grouped) +
       margin              = margin(t = 10, b = 10)
     ),
     strip.text = element_markdown(
-      size                = rel(0.6)
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
     ),
     axis.title = element_markdown(
-      size                = rel(0.5),
+      size                = rel(2),
       family              = "text"
     ),
     axis.text.y  = element_markdown(
-      size = rel(0.8)
+      size = rel(2),
+      face = "bold"
     ),
     axis.text.x = element_markdown(
-      size = rel(0.6),
+      size = rel(2),
       face = "bold"
     )
   ) 
@@ -276,4 +279,14 @@ p1 <- df1 %>%
 
 
 ```
+
+# November 4th week
+
+
+```{r}
+parfumo_data_clean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-12-10/parfumo_data_clean.csv')
+```
+
+
+
 
