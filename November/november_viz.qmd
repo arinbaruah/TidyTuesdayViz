@@ -288,5 +288,31 @@ parfumo_data_clean <- readr::read_csv('https://raw.githubusercontent.com/rfordat
 ```
 
 
+```{r}
+parfumo_data_clean %>% ggplot(aes(x = Rating_Value)) + geom_histogram() 
+```
+
+
+## Data wrangling
+
+```{r}
+parfumo_data_clean <- parfumo_data_clean %>% mutate(Rating_category = case_when(Rating_Value <= 5 ~ "Low",
+                                                                                Rating_Value > 5 & Rating_Value <= 7.5 ~ "Medium",
+                                                                                Rating_Value > 7.5 ~ "High"))
+```
+
+```{r}
+
+parfumo_data_clean <- parfumo_data_clean %>% drop_na()
+main_accords_long <- parfumo_data_clean %>% separate_rows(Main_Accords,sep = ",")
+top_notes_long <- parfumo_data_clean %>% separate_rows(Top_Notes,sep = ",")
+mid_notes_long <- parfumo_data_clean %>% separate_rows(Middle_Notes,sep = ",")
+base_notes_long <- parfumo_data_clean %>% separate_rows(Base_Notes,sep = ",")
+```
+
+
+```{r}
+main_acccords_summarised <- main_accors_long %>% group_by(Main_Accords) %>% summarise(Average_rating = mean(Rating_Value))
+```
 
 
