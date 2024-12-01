@@ -312,7 +312,30 @@ base_notes_long <- parfumo_data_clean %>% separate_rows(Base_Notes,sep = ",")
 
 
 ```{r}
-main_acccords_summarised <- main_accors_long %>% group_by(Main_Accords) %>% summarise(Average_rating = mean(Rating_Value))
+main_accords_summarised <- main_accors_long %>% group_by(Release_Year,Main_Accords) %>% summarise(Average_rating = mean(Rating_Value))
+```
+
+
+```{r}
+main_acccords_summarised  %>% ggplot(aes(x = Release_Year,y = Average_rating,color = Main_Accords)) + geom_line() + facet_wrap(~Main_Accords)
+```
+
+```{r}
+main_accors_long %>% group_by(Release_Year) %>% summarise(n_distinct(Name))
+```
+
+```{r}
+high_rated <- top_notes_long %>% filter(Rating_category == "High")
+
+high_rated_topnotes <- high_rated %>% group_by(Top_Notes) %>% summarise(Total = n()) %>% arrange(-Total)
+
+high_rated <- mid_notes_long %>% filter(Rating_category == "High")
+
+high_rated_midnotes <- high_rated %>% group_by(Middle_Notes) %>% summarise(Total = n())  %>% arrange(-Total)
+
+high_rated <- base_notes_long %>% filter(Rating_category == "High")
+
+high_rated_basenotes <- high_rated %>% group_by(Base_Notes) %>% summarise(Total = n())  %>% arrange(-Total)
 ```
 
 
