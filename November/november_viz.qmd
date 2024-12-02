@@ -338,4 +338,22 @@ high_rated <- base_notes_long %>% filter(Rating_category == "High")
 high_rated_basenotes <- high_rated %>% group_by(Base_Notes) %>% summarise(Total = n())  %>% arrange(-Total)
 ```
 
+```{r}
+library(ggwordcloud)
+
+ggplot(
+  high_rated_basenotes ,
+  aes(
+    label = Base_Notes, size = Total,color = Total
+  )
+) +
+  geom_text_wordcloud_area(
+    mask = readPNG("heart_image.png"
+    ),
+    rm_outside = TRUE
+  ) +
+  scale_size_area(max_size = 20) +
+  theme_minimal() +
+  scale_color_gradient(low = "#FF69B4", high = "#C41E3A")
+```
 
