@@ -339,21 +339,36 @@ high_rated_basenotes <- high_rated %>% group_by(Base_Notes) %>% summarise(Total 
 ```
 
 ```{r}
-library(ggwordcloud)
 
 ggplot(
-  high_rated_basenotes ,
+  high_rated_midnotes ,
   aes(
-    label = Base_Notes, size = Total,color = Total
+    label = Middle_Notes, size = Total,color = Total
   )
 ) +
   geom_text_wordcloud_area(
-    mask = readPNG("heart_image.png"
+    mask = readPNG("perfume.png"
     ),
     rm_outside = TRUE
   ) +
   scale_size_area(max_size = 20) +
   theme_minimal() +
-  scale_color_gradient(low = "#FF69B4", high = "#C41E3A")
+  scale_color_gradient(low = "#00CED1", high = "#2E8B57")
+```
+```{r}
+ggplot(
+  high_rated_topnotes ,
+  aes(
+    label = Top_Notes, size = Total,color = Total
+  )
+) +
+  geom_text_wordcloud_area(
+    mask = readPNG("perfume.png"
+    ),
+    rm_outside = TRUE
+  ) +
+  scale_size_area(max_size = 20) +
+  theme_minimal() +
+  scale_color_gradient(low = "#00CED1", high = "#2E8B57")
 ```
 
