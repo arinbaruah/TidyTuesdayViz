@@ -357,6 +357,23 @@ ggplot(
 ```
 ```{r}
 ggplot(
+  high_rated_basenotes ,
+  aes(
+    label = Base_Notes, size = Total,color = Total
+  )
+) +
+  geom_text_wordcloud_area(
+    mask = readPNG("perfume.png"
+    ),
+    rm_outside = TRUE
+  ) +
+  scale_size_area(max_size = 20) +
+  theme_minimal() +
+  scale_color_gradient(low = "#F4D03F", high = "#6C3483")
+```
+
+```{r}
+ggplot(
   high_rated_topnotes ,
   aes(
     label = Top_Notes, size = Total,color = Total
@@ -369,6 +386,7 @@ ggplot(
   ) +
   scale_size_area(max_size = 20) +
   theme_minimal() +
-  scale_color_gradient(low = "#00CED1", high = "#2E8B57")
+  scale_color_gradient(low = "#FFA07A", high = "#FFD700")
 ```
+
 
