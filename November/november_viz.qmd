@@ -389,4 +389,26 @@ ggplot(
   scale_color_gradient(low = "#FFA07A", high = "#FFD700")
 ```
 
+# Ratings
+
+
+
+
+```{r}
+parfumo_data_clean
+total_ratings <- parfumo_data_clean %>% group_by(Brand) %>% summarise(Total_ratings = sum(Rating_Count)) %>% arrange(-Total_ratings)
+avg_ratings <- parfumo_data_clean %>% group_by(Brand) %>% summarise(Avg_rating = mean(Rating_Value)) %>% arrange(Avg_rating)
+
+ratings <- total_ratings %>% left_join(avg_ratings,by = "Brand") %>% arrange(Avg_rating) %>% tail(15)
+
+rating_order <- ratings$Brand
+```
+
+```{r}
+ratings_long <- ratings %>% pivot_longer(cols = c("Total_ratings","Avg_rating"),values_to = "Value",names_to = "Field")
+
+
+ratings_long$Brand <- factor(ratings_long$Brand,levels = rating_order)
+ggplot(ratings_long,aes(y = Brand, x = Value)) + geom_col() + facet_wrap(~Field,nrow = 1,scales = "free_x")
+```
 
