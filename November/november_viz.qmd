@@ -396,16 +396,16 @@ ggplot(
 
 ```{r}
 parfumo_data_clean
-total_ratings <- parfumo_data_clean %>% group_by(Brand) %>% summarise(Total_ratings = sum(Rating_Count)) %>% arrange(-Total_ratings)
-avg_ratings <- parfumo_data_clean %>% group_by(Brand) %>% summarise(Avg_rating = mean(Rating_Value)) %>% arrange(Avg_rating)
+total_ratings <- parfumo_data_clean %>% group_by(Brand) %>% summarise("Total ratings" = sum(Rating_Count)) %>% arrange(-`Total ratings`)
+avg_ratings <- parfumo_data_clean %>% group_by(Brand) %>% summarise("Average rating" = mean(Rating_Value)) %>% arrange(`Average rating`)
 
-ratings <- total_ratings %>% left_join(avg_ratings,by = "Brand") %>% arrange(Avg_rating) %>% tail(15)
+ratings <- total_ratings %>% left_join(avg_ratings,by = "Brand") %>% arrange(`Average rating`) %>% tail(15)
 
 rating_order <- ratings$Brand
 ```
 
 ```{r}
-ratings_long <- ratings %>% pivot_longer(cols = c("Total_ratings","Avg_rating"),values_to = "Value",names_to = "Field")
+ratings_long <- ratings %>% pivot_longer(cols = c("Total ratings","Average rating"),values_to = "Value",names_to = "Field")
 
 
 ratings_long$Brand <- factor(ratings_long$Brand,levels = rating_order)
