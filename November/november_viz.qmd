@@ -409,7 +409,8 @@ ratings_long <- ratings %>% pivot_longer(cols = c("Total ratings","Average ratin
 
 
 ratings_long$Brand <- factor(ratings_long$Brand,levels = rating_order)
-ggplot(ratings_long %>% filter(Field == "Average rating"),aes(y = Brand, x = Value,fill = Value)) + geom_col() + facet_wrap(~Field,nrow = 1,scales = "free_x") + scale_fill_continuous(type = "gradient",low = "#132B43",
+ggplot(ratings_long %>% filter(Field == "Average rating"),aes(y = Brand, x = Value,fill = Value)) + geom_col() + geom_vline(xintercept = 7.5, linetype = "dotted") + geom_text(aes(label = round(Value,1)),color = "white",) +
+  facet_wrap(~Field,nrow = 1,scales = "free_x") + scale_fill_continuous(type = "gradient",low = "#132B43",
   high = "#AF9ACD",)
 ```
 
