@@ -77,8 +77,8 @@ text_col     <- colorspace::darken("gray40" , 0.2)
 # fonts
 
 font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
-font_add_google("Roboto", regular.wt = 400, family = "title")                 
-font_add_google("Alegreya", regular.wt = 400, family = "subtitle")  
+font_add_google("Pattaya", regular.wt = 400, family = "title")                 
+font_add_google("Radley", regular.wt = 400, family = "subtitle")  
 font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
 font_add_google("Merriweather", regular.wt = 400,family = "caption")
 showtext_auto(enable = TRUE)  
@@ -92,7 +92,7 @@ subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been managing
 
 X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
 
-caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: US Customs and Border Patrol| #TidyTuesdayR #rstudio #gghighlight #ggplot2")
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesdayR | #wordcloud #rstudio #ggplot2")
 
 theme_set(theme_minimal(base_size = 15, base_family = "text"))                
 
@@ -405,12 +405,106 @@ rating_order <- ratings$Brand
 ```
 
 ```{r}
+
+title_text <- "The Fragrance Ratings Guide: Top Brands Compared"
+
+subtitle_text <- "<span style='color:#DDAA0C'><strong>Hermès</span></strong> fragrances lead the pack with an impressive average rating of 8.8, securing their place as the highest-rated brand. <br> Following closely are <span style='color:#236A82'><strong>Roja Parfums</span></strong> with a strong 8.4, <span style='color:#D0C81A'><strong>Jean Patou</span></strong> at 8.3, and <span style='color:#D48FDC'><strong>Chanel and Tous</span></strong>, tied at 8.2, rounding out the <br> top five highest-rated perfume brands."
+
 ratings_long <- ratings %>% pivot_longer(cols = c("Total ratings","Average rating"),values_to = "Value",names_to = "Field")
 
 
 ratings_long$Brand <- factor(ratings_long$Brand,levels = rating_order)
-ggplot(ratings_long %>% filter(Field == "Average rating"),aes(y = Brand, x = Value,fill = Value)) + geom_col() + geom_vline(xintercept = 7.5, linetype = "dotted") + geom_text(aes(label = round(Value,1)),color = "white",) +
-  facet_wrap(~Field,nrow = 1,scales = "free_x") + scale_fill_continuous(type = "gradient",low = "#132B43",
-  high = "#AF9ACD",)
+pl_perfume <- ggplot(ratings_long %>% filter(Field == "Average rating"),aes(y = Brand, x = Value,fill = Value)) +  
+  geom_rect(
+    xmin = 7.5, xmax = 10, 
+    ymin = 0, ymax = 20,
+    fill = "#E5BF4A",
+    alpha = 0.2
+  ) +
+  geom_col() + geom_vline(xintercept = 7.5, linetype = "dotted") + 
+  geom_text(aes(label = round(Value,1)), size = 7,
+            color = "white",nudge_x = -0.23) + 
+  annotate(
+    "text",
+    x = 8.4,
+    y = "Sean John",
+    colour = "black",
+    label = 'Highly Rated Fragrances',
+    size = unit(6, "pt")
+  ) + scale_fill_continuous(type = "gradient",low = "#132B43",
+  high = "#AF9ACD",) +
+  labs(title = title_text,
+       subtitle = subtitle_text,
+       caption = caption_text,
+       x = "Average rating",
+       y = "Perfume brand") +
+    scale_color_met_d(name="Redon") + theme_minimal() +
+    theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(5),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2),
+      face = "bold"
+    )
+  ) 
+
+
+ggsave("Fragrance_comparison.jpeg",plot = pl_perfume,width =8, height = 5)
 ```
 
