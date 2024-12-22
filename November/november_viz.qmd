@@ -541,9 +541,73 @@ pl_midnotes <- ggplot(
     ),
     rm_outside = TRUE
   ) +
-  labs(title = "Most popular middle notes of highly rated perfumes") +
+  labs(title = "Middle notes of highly rated perfumes") +
   scale_size_area(max_size = 20) +
-  scale_color_gradient(low = "#00CED1", high = "#2E8B57")
+  scale_color_gradient(low = "#00CED1", high = "#2E8B57") +
+  theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3.5),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(2),
+      family              = "subtitle",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2),
+      face = "bold"
+    )
+  ) 
 ```
 
 
@@ -560,9 +624,73 @@ pl_basenotes <- ggplot(
     ),
     rm_outside = TRUE
   ) +
-    labs(title = "Most popular base notes of highly rated perfumes") +
+    labs(title = "Base notes of highly rated perfumes") +
   scale_size_area(max_size = 20) +
-  scale_color_gradient(low = "#F4D03F", high = "#6C3483")
+  scale_color_gradient(low = "#6a1b9a", high = "#ff4081") +
+  theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3.5),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(2),
+      family              = "subtitle",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.7
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2),
+      face = "bold"
+    )
+  ) 
 ```
 
 ```{r}
@@ -577,9 +705,74 @@ pl_topnotes <- ggplot(
     ),
     rm_outside = TRUE
   ) +
-      labs(title = "Most popular top notes of highly rated perfumes") +
+      labs(title = "Top notes of highly rated perfumes") +
   scale_size_area(max_size = 20) +
-  scale_color_gradient(low = "#8E44AD", high = "#3498db")
+  scale_color_gradient(low = "#d84315", high = "#3498db") +
+  theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3.5),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(2),
+      family              = "subtitle",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2),
+      face = "bold"
+    )
+  ) 
+  
 ```
 
 # Ratings
@@ -710,7 +903,7 @@ ggsave("Fragrance_comparison.jpeg",plot = pl_perfume,width =8, height = 5)
 library(patchwork)
 
 pl_final <- (pl_perfume)/(pl_basenotes + pl_midnotes + pl_topnotes) +
-             plot_layout(heights = c(4,2))
+             plot_layout(heights = c(4,2.5))
 
 ggsave("Fragrance_infographic.jpeg",plot = pl_final,width =9, height = 6)
 ```
