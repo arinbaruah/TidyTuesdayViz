@@ -32,3 +32,6 @@ This repository contains all the visualisation entries to TidyTuesday challenges
 
 # 25th November
 ![](https://github.com/arinbaruah/TidyTuesdayViz/blob/main/November/US_Border_encounter.jpeg)
+
+# 22nd December
+![](https://github.com/arinbaruah/TidyTuesdayViz/blob/main/November/Fragrance_infographic.jpeg)
