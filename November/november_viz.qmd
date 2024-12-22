@@ -542,7 +542,7 @@ pl_midnotes <- ggplot(
     rm_outside = TRUE
   ) +
   labs(title = "Middle notes of highly rated perfumes") +
-  scale_size_area(max_size = 20) +
+  scale_size_area(max_size = 40) +
   scale_color_gradient(low = "#00CED1", high = "#2E8B57") +
   theme(legend.position = "none",
         panel.spacing = unit(3, "lines"),
@@ -625,7 +625,7 @@ pl_basenotes <- ggplot(
     rm_outside = TRUE
   ) +
     labs(title = "Base notes of highly rated perfumes") +
-  scale_size_area(max_size = 20) +
+  scale_size_area(max_size = 40) +
   scale_color_gradient(low = "#6a1b9a", high = "#ff4081") +
   theme(legend.position = "none",
         panel.spacing = unit(3, "lines"),
@@ -701,12 +701,12 @@ pl_topnotes <- ggplot(
   )
 ) +
   geom_text_wordcloud_area(
-    mask = readPNG("perfume.png"
+    mask = readPNG("perfume.png",
     ),
     rm_outside = TRUE
   ) +
       labs(title = "Top notes of highly rated perfumes") +
-  scale_size_area(max_size = 20) +
+  scale_size_area(max_size = 40) +
   scale_color_gradient(low = "#d84315", high = "#3498db") +
   theme(legend.position = "none",
         panel.spacing = unit(3, "lines"),
@@ -794,7 +794,7 @@ rating_order <- ratings$Brand
 
 title_text <- "The Fragrance Ratings Guide: Top Brands Compared"
 
-subtitle_text <- "<span style='color:#DDAA0C'><strong>Hermès</span></strong> fragrances lead the pack with an impressive average rating of 8.8, securing their place as the highest-rated <br> brand.Following closely are <span style='color:#236A82'><strong>Roja Parfums</span></strong> with a strong 8.4, <span style='color:#D0C81A'><strong>Jean Patou</span></strong> at 8.3, and <span style='color:#D48FDC'><strong>Chanel and Tous</span></strong>, tied at 8.2, <br> rounding out the top five highest-rated perfume brands."
+subtitle_text <- "<span style='color:#DDAA0C'><strong>Hermès</span></strong> fragrances lead the pack with an impressive average rating of 8.8, securing their place as the highest-rated brand. Following closely are <span style='color:#236A82'><strong>Roja Parfums</span></strong> <br> with a strong 8.4, <span style='color:#ff4081'><strong>Jean Patou</span></strong> at 8.3, and <span style='color:#D48FDC'><strong>Chanel and Tous</span></strong>, tied at 8.2, rounding out the top five highest-rated perfume brands."
 
 ratings_long <- ratings %>% pivot_longer(cols = c("Total ratings","Average rating"),values_to = "Value",names_to = "Field")
 
@@ -818,7 +818,7 @@ pl_perfume <- ggplot(ratings_long %>% filter(Field == "Average rating"),aes(y = 
     label = 'Highly Rated Fragrances',
     family = "text",
     face = "bold",
-    size = unit(6, "pt")
+    size = unit(10, "pt")
   ) + scale_fill_continuous(type = "gradient",low = "#132B43",
   high = "#AF9ACD",) +
   labs(title = title_text,
@@ -883,17 +883,35 @@ pl_perfume <- ggplot(ratings_long %>% filter(Field == "Average rating"),aes(y = 
       family              = "text"
     ),
     axis.text.y  = element_markdown(
-      size = rel(2),
-      face = "bold"
+      size = rel(2)
     ),
     axis.text.x = element_markdown(
-      size = rel(2),
-      face = "bold"
+      size = rel(2)
     )
   ) 
 
 
 ggsave("Fragrance_comparison.jpeg",plot = pl_perfume,width =8, height = 5)
+```
+
+```{r}
+# TITLE
+text <- tibble(
+  x = 100, y = 0,
+  label = caption_text
+)
+
+caption <- ggplot(text, aes(x = x, y = y)) +
+  geom_textbox(
+    aes(label = label),
+    box.color = bkg_col, fill=bkg_col, width = unit(35, "lines"),
+    family="text", size = 9, lineheight = 1,
+    hjust = 0.5, vjust = 0.5  # Centering the text
+  ) +
+  coord_cartesian(expand = FALSE, clip = "off") +
+  theme_void() +
+  theme(plot.background = element_rect(color=bkg_col, fill=bkg_col))
+caption
 ```
 
 
@@ -902,10 +920,10 @@ ggsave("Fragrance_comparison.jpeg",plot = pl_perfume,width =8, height = 5)
 ```{r}
 library(patchwork)
 
-pl_final <- (pl_perfume)/(pl_basenotes + pl_midnotes + pl_topnotes) +
-             plot_layout(heights = c(4,2.5))
+pl_final <- (pl_perfume)/(pl_basenotes + pl_midnotes + pl_topnotes)/caption +
+             plot_layout(heights = c(6,4,0.5))
 
-ggsave("Fragrance_infographic.jpeg",plot = pl_final,width =9, height = 6)
+ggsave("Fragrance_infographic.jpeg",plot = pl_final,width =12, height = 7)
 ```
 
 
