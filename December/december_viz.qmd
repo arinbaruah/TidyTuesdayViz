@@ -1,5 +1,5 @@
 ---
-title: "August TT viz"
+title: "December TT viz"
 format: html
 ---
 
@@ -926,4 +926,12 @@ pl_final <- (pl_perfume)/(pl_basenotes + pl_midnotes + pl_topnotes)/caption +
 ggsave("Fragrance_infographic.jpeg",plot = pl_final,width =12, height = 7)
 ```
 
+
+# D & D viz
+
+```{r data}
+
+spells <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-12-17/spells.csv')
+spells
+```
 
