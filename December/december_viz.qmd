@@ -1,0 +1,929 @@
+---
+title: "August TT viz"
+format: html
+---
+
+
+```{r}
+
+library(tidyverse)
+library(tidymodels)
+library(ggplot2)
+library(kableExtra)
+library(caret)
+library(plotROC)
+library(mulgar)
+library(tourr)
+library(GGally)
+library(uwot)
+library(animation)
+library(magick)
+library(ggfortify)
+library(ggrepel)
+library(FunnelPlotR)
+library(ggfunnel)
+library(waffle)
+library(ggimage)
+```
+
+
+
+
+
+
+
+# November 3rd week
+
+```{r}
+cbp_resp <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-26/cbp_resp.csv')
+cbp_state <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-11-26/cbp_state.csv')
+```
+
+
+```{r}
+cbp_resp
+cbp_state
+```
+
+
+```{r theme}
+
+library(tidyverse)
+library(stringr)
+library(glue)
+library(ggrepel)
+library(ggplot2)
+library(ggtext)
+library(sysfonts)
+library(showtext)
+library(ggbump)
+library(gghighlight)
+library(MetBrewer)
+
+# caption handles
+swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
+li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
+gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
+mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
+tt <- str_glue("#TidyTuesdayR: November 2024 &bull; Source: US Customs and Border Protection (CBP) <br>") 
+
+# plot colors
+bkg_col      <- "#EAB1CA"  
+title_col    <- "#3d3d3d"           
+subtitle_col <- "#3d3d3d"     
+caption_col  <- "#72647D"   
+text_col     <- colorspace::darken("gray40" , 0.2)  
+
+# fonts
+
+font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
+font_add_google("Lato", regular.wt = 400, family = "title")                 
+font_add_google("Radley", regular.wt = 400, family = "subtitle")  
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
+font_add_google("Merriweather", regular.wt = 400,family = "caption")
+showtext_auto(enable = TRUE)  
+
+# Plot texts
+
+title_text <- "<span style='color:darkred'>US authorities recording high border encounters <br> across nationalities (2020-2024)</span>"
+
+subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been managing record-high encounters with individuals of various nationalities at the U.S. borders. A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern borders reveals that Mexican nationals remain the most frequently encountered. However, this marks the second consecutive decline in encounters involving Mexican citizens. While the numbers for most other nationalities have remained relatively stable, there has been a significant rise in encounters with individuals from Haiti and Venezuela, who were either apprehended for unauthorized border crossings or deemed inadmissible. "
+
+
+X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
+
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesdayR | #wordcloud #rstudio #ggplot2")
+
+theme_set(theme_minimal(base_size = 15, base_family = "text"))                
+
+# Theme updates
+
+theme_update(
+  plot.title.position   = "plot",
+  plot.caption.position = "plot",
+  legend.position       = 'plot',
+  plot.margin           = margin(t = 10, r = 15, b = 0, l = 15),
+  plot.background       = element_rect(fill = bkg_col, color = bkg_col),
+  panel.background      = element_rect(fill = bkg_col, color = bkg_col),
+  axis.title.x          = element_text(margin = margin(10, 0, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.title.y          = element_text(margin = margin(0, 10, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.text             = element_text(size = 10, color = text_col, family = 'text',face = "bold"),
+  panel.grid.minor.y    = element_blank(),
+  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'gray40'),
+  panel.grid.minor.x    = element_blank(),
+  panel.grid.major.x    = element_blank(),
+  axis.line.x           = element_line(color = "#d7d7d8", linewidth = .2),
+)
+
+ 
+
+```
+
+
+
+```{r datawrangle}
+
+top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER") %>% 
+  group_by(citizenship) %>% summarise(total = sum(encounter_count/10^3)) %>% 
+  arrange(-total) %>% head(10)
+
+top_countries <- top_countries_grouped$citizenship
+
+top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER" & citizenship %in% top_countries) %>% 
+  group_by(fiscal_year,citizenship) %>% summarise(total = sum(encounter_count/10^3)) %>% 
+  arrange(-total)
+
+top_countries_grouped$citizenship <- factor(top_countries_grouped$citizenship,levels = top_countries)
+```
+
+```{r viz}
+
+subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been handling an average of <strong>approximately 178,000 encounters annually </strong> with individuals of <br> various nationalities at the U.S. borders. A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern <br> borders reveals that <span style='color:steelblue'><strong>Mexican</strong></span> nationals remain the most frequently encountered. However, this marks the second consecutive decline in encounters <br> involving Mexican citizens. While the numbers for most other nationalities have remained relatively stable, there has been a <strong> significant rise in <br> encounters </strong> with individuals from <span style='color:#cc5200'><strong>Haiti</strong></span> and <span style='color:#004d00'><strong>Venezuela</strong></span>, who were either apprehended for unauthorized border crossings or deemed inadmissible.  "
+
+pl1 <- ggplot(data = top_countries_grouped) +
+    geom_hline(aes(yintercept = mean(total)),linetype="solid", size=.25) +
+    geom_point(data= top_countries_grouped %>% 
+               group_by(citizenship) %>% 
+               slice_max(fiscal_year),
+             aes(x=fiscal_year, y=total, color=citizenship),shape=16) +
+  geom_line(aes(x=fiscal_year, y=total, color=citizenship)) +
+  gghighlight(use_direct_label = FALSE,
+              unhighlighted_params = list(colour = alpha("grey85", 1))) +
+  geom_text(data=top_countries_grouped %>% 
+               group_by(citizenship) %>% 
+               slice_max(fiscal_year),
+             aes(x=fiscal_year, y=total, color= citizenship, label = round(total)),
+             hjust = 1, vjust = -1.5, size=2, fontface="bold") +
+  facet_wrap(~factor(citizenship,levels = top_countries),nrow = 2) +
+  labs(title = title_text,
+       subtitle = subtitle_text,
+       caption = caption_text,
+       x = "Fiscal year",
+       y = "Total number of encounters (in 1000s)") +
+    scale_color_met_d(name="Redon") + theme_minimal() +
+    theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linewidth = .3, linetype = "dashed", color = "grey50"),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(4),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(1.5), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2),
+      face = "bold"
+    )
+  ) 
+  
+pl1
+
+ggsave("US_Border_encounter.jpeg",plot = pl1,width =8, height = 5)
+
+```
+
+
+
+
+
+```{r}
+
+df1 <- read.csv("https://raw.githubusercontent.com/holtzy/R-graph-gallery/master/DATA/dataConsumerConfidence.csv") %>% 
+  mutate(date=lubridate::my(Time)) %>% 
+  select(-Time) %>% 
+  pivot_longer(!date, names_to = "country", values_to = "value") %>% 
+  na.omit()
+
+p1 <- df1 %>% 
+  ggplot() +
+  geom_hline(yintercept = 100,linetype="solid", size=.25) +
+  geom_point(data=df1 %>% 
+               group_by(country) %>% 
+               slice_max(date),
+             aes(x=date, y=value, color=country),shape=16) +
+  geom_line(aes(x=date, y=value, color=country)) +
+  gghighlight(use_direct_label = FALSE,
+              unhighlighted_params = list(colour = alpha("grey85", 1))) +
+  geom_text(data=df1 %>% 
+               group_by(country) %>% 
+               slice_max(date),
+             aes(x=date, y=value, color=country, label = round(value)),
+             hjust = -.5, vjust = 2, size=rel(0.5), fontface="bold") +
+  scale_x_date(date_labels = "%y") +
+  scale_y_continuous(breaks = c(90,95,100,105,110),
+                     labels = c("","","100","","")
+                     ) +
+  #facet_wrap(~ country) +
+  facet_wrap(~  factor(country, levels=c('USA','China','Japan','Germany', 'UK','France', 'Italy', 'South Korea', 'Australia'))) +
+  coord_cartesian(clip = "off") +
+  theme(
+    axis.title = element_blank(),
+    axis.text = element_text(color="black", size=7),
+    strip.text.x = element_text(face="bold"),
+    plot.title = element_markdown(hjust=.5,size=34, color="black",lineheight=.8, face="bold", margin=margin(20,0,30,0)),
+    plot.subtitle = element_markdown(hjust=.5,size=18, color="black",lineheight = 1, margin=margin(10,0,30,0)),
+    plot.caption = element_markdown(hjust=.5, margin=margin(60,0,0,0), size=8, color="black", lineheight = 1.2),
+    plot.caption.position = "plot",
+    plot.background = element_rect(color="cornsilk", fill="cornsilk"),
+    plot.margin = margin(10,10,10,10),
+    legend.position = "none",
+    legend.title = element_text(face="bold")
+  )
+
+
+```
+
+# November 4th week
+
+
+```{r theme2}
+
+library(tidyverse)
+library(stringr)
+library(glue)
+library(ggrepel)
+library(ggplot2)
+library(ggtext)
+library(sysfonts)
+library(showtext)
+library(ggbump)
+library(gghighlight)
+library(MetBrewer)
+
+# caption handles
+swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
+li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
+gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
+mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
+tt <- str_glue("#TidyTuesdayR: November 2024 &bull; Source: US Customs and Border Protection (CBP) <br>") 
+
+# plot colors
+bkg_col      <- "#DED4BC"  
+title_col    <- "#3d3d3d"           
+subtitle_col <- "#3d3d3d"     
+caption_col  <- "#72647D"   
+text_col     <- colorspace::darken("gray40" , 0.2)  
+
+# fonts
+
+font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
+font_add_google("Pattaya", regular.wt = 400, family = "title")                 
+font_add_google("Radley", regular.wt = 400, family = "subtitle")  
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
+font_add_google("Merriweather", regular.wt = 400,family = "caption")
+showtext_auto(enable = TRUE)  
+
+# Plot texts
+
+title_text <- "<span style='color:darkred'>US authorities recording high border encounters <br> across nationalities (2020-2024)</span>"
+
+subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been managing record-high encounters with individuals of various nationalities at the U.S. borders. A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern borders reveals that Mexican nationals remain the most frequently encountered. However, this marks the second consecutive decline in encounters involving Mexican citizens. While the numbers for most other nationalities have remained relatively stable, there has been a significant rise in encounters with individuals from Haiti and Venezuela, who were either apprehended for unauthorized border crossings or deemed inadmissible. "
+
+
+X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
+
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesdayR | #wordcloud #rstudio #ggplot2")
+
+theme_set(theme_minimal(base_size = 15, base_family = "text"))                
+
+# Theme updates
+
+theme_update(
+  plot.title.position   = "plot",
+  plot.caption.position = "plot",
+  legend.position       = 'plot',
+  plot.margin           = margin(t = 10, r = 15, b = 0, l = 15),
+  plot.background       = element_rect(fill = bkg_col, color = bkg_col),
+  panel.background      = element_rect(fill = bkg_col, color = bkg_col),
+  axis.title.x          = element_text(margin = margin(10, 0, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.title.y          = element_text(margin = margin(0, 10, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.text             = element_text(size = 10, color = text_col, family = 'text',face = "bold"),
+  panel.grid.minor.y    = element_blank(),
+  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'gray40'),
+  panel.grid.minor.x    = element_blank(),
+  panel.grid.major.x    = element_blank(),
+  axis.line.x           = element_line(color = "#d7d7d8", linewidth = .2),
+)
+
+ 
+
+```
+
+
+
+```{r datawrangle}
+
+top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER") %>% 
+  group_by(citizenship) %>% summarise(total = sum(encounter_count/10^3)) %>% 
+  arrange(-total) %>% head(10)
+
+top_countries <- top_countries_grouped$citizenship
+
+top_countries_grouped <- cbp_resp %>% filter(citizenship != "OTHER" & citizenship %in% top_countries) %>% 
+  group_by(fiscal_year,citizenship) %>% summarise(total = sum(encounter_count/10^3)) %>% 
+  arrange(-total)
+
+top_countries_grouped$citizenship <- factor(top_countries_grouped$citizenship,levels = top_countries)
+```
+
+```{r viz}
+
+subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been handling an average of <strong>approximately 178,000 encounters annually </strong> with individuals of <br> various nationalities at the U.S. borders. A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern <br> borders reveals that <span style='color:steelblue'><strong>Mexican</strong></span> nationals remain the most frequently encountered. However, this marks the second consecutive decline in encounters <br> involving Mexican citizens. While the numbers for most other nationalities have remained relatively stable, there has been a <strong> significant rise in <br> encounters </strong> with individuals from <span style='color:#cc5200'><strong>Haiti</strong></span> and <span style='color:#004d00'><strong>Venezuela</strong></span>, who were either apprehended for unauthorized border crossings or deemed inadmissible.  "
+
+pl1 <- ggplot(data = top_countries_grouped) +
+    geom_hline(aes(yintercept = mean(total)),linetype="solid", size=.25) +
+    geom_point(data= top_countries_grouped %>% 
+               group_by(citizenship) %>% 
+               slice_max(fiscal_year),
+             aes(x=fiscal_year, y=total, color=citizenship),shape=16) +
+  geom_line(aes(x=fiscal_year, y=total, color=citizenship)) +
+  gghighlight(use_direct_label = FALSE,
+              unhighlighted_params = list(colour = alpha("grey85", 1))) +
+  geom_text(data=top_countries_grouped %>% 
+               group_by(citizenship) %>% 
+               slice_max(fiscal_year),
+             aes(x=fiscal_year, y=total, color= citizenship, label = round(total)),
+             hjust = 1, vjust = -1.5, size=2, fontface="bold") +
+  facet_wrap(~factor(citizenship,levels = top_countries),nrow = 2) +
+  labs(title = title_text,
+       subtitle = subtitle_text,
+       caption = caption_text,
+       x = "Fiscal year",
+       y = "Total number of encounters (in 1000s)") +
+    scale_color_met_d(name="Redon") + theme_minimal() +
+    theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linewidth = .3, linetype = "dashed", color = "grey50"),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(4),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(1.5), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2),
+      face = "bold"
+    )
+  ) 
+  
+pl1
+
+ggsave("US_Border_encounter.jpeg",plot = pl1,width =8, height = 5)
+
+```
+
+
+```{r}
+parfumo_data_clean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2024/2024-12-10/parfumo_data_clean.csv')
+```
+
+
+```{r}
+parfumo_data_clean %>% ggplot(aes(x = Rating_Value)) + geom_histogram() 
+```
+
+
+## Data wrangling
+
+```{r}
+parfumo_data_clean <- parfumo_data_clean %>% mutate(Rating_category = case_when(Rating_Value <= 5 ~ "Low",
+                                                                                Rating_Value > 5 & Rating_Value <= 7.5 ~ "Medium",
+                                                                                Rating_Value > 7.5 ~ "High"))
+```
+
+```{r}
+
+parfumo_data_clean <- parfumo_data_clean %>% drop_na()
+main_accords_long <- parfumo_data_clean %>% separate_rows(Main_Accords,sep = ",")
+top_notes_long <- parfumo_data_clean %>% separate_rows(Top_Notes,sep = ",")
+mid_notes_long <- parfumo_data_clean %>% separate_rows(Middle_Notes,sep = ",")
+base_notes_long <- parfumo_data_clean %>% separate_rows(Base_Notes,sep = ",")
+```
+
+
+```{r}
+main_accords_summarised <- main_accors_long %>% group_by(Release_Year,Main_Accords) %>% summarise(Average_rating = mean(Rating_Value))
+```
+
+
+```{r}
+main_acccords_summarised  %>% ggplot(aes(x = Release_Year,y = Average_rating,color = Main_Accords)) + geom_line() + facet_wrap(~Main_Accords)
+```
+
+```{r}
+main_accors_long %>% group_by(Release_Year) %>% summarise(n_distinct(Name))
+```
+
+```{r}
+high_rated <- top_notes_long %>% filter(Rating_category == "High")
+
+high_rated_topnotes <- high_rated %>% group_by(Top_Notes) %>% summarise(Total = n()) %>% arrange(-Total)
+
+high_rated <- mid_notes_long %>% filter(Rating_category == "High")
+
+high_rated_midnotes <- high_rated %>% group_by(Middle_Notes) %>% summarise(Total = n())  %>% arrange(-Total)
+
+high_rated <- base_notes_long %>% filter(Rating_category == "High")
+
+high_rated_basenotes <- high_rated %>% group_by(Base_Notes) %>% summarise(Total = n())  %>% arrange(-Total)
+```
+
+```{r}
+
+pl_midnotes <- ggplot(
+  high_rated_midnotes ,
+  aes(
+    label = Middle_Notes, size = Total,color = Total
+  )
+) +
+  geom_text_wordcloud_area(
+    mask = readPNG("perfume.png"
+    ),
+    rm_outside = TRUE
+  ) +
+  labs(title = "Middle notes of highly rated perfumes") +
+  scale_size_area(max_size = 40) +
+  scale_color_gradient(low = "#00CED1", high = "#2E8B57") +
+  theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3.5),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(2),
+      family              = "subtitle",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2),
+      face = "bold"
+    )
+  ) 
+```
+
+
+```{r}
+
+pl_basenotes <- ggplot(
+  high_rated_basenotes ,
+  aes(
+    label = Base_Notes, size = Total,color = Total
+  )
+) +
+  geom_text_wordcloud_area(
+    mask = readPNG("perfume.png"
+    ),
+    rm_outside = TRUE
+  ) +
+    labs(title = "Base notes of highly rated perfumes") +
+  scale_size_area(max_size = 40) +
+  scale_color_gradient(low = "#6a1b9a", high = "#ff4081") +
+  theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3.5),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(2),
+      family              = "subtitle",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.7
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2),
+      face = "bold"
+    )
+  ) 
+```
+
+```{r}
+pl_topnotes <- ggplot(
+  high_rated_topnotes ,
+  aes(
+    label = Top_Notes, size = Total,color = Total
+  )
+) +
+  geom_text_wordcloud_area(
+    mask = readPNG("perfume.png",
+    ),
+    rm_outside = TRUE
+  ) +
+      labs(title = "Top notes of highly rated perfumes") +
+  scale_size_area(max_size = 40) +
+  scale_color_gradient(low = "#d84315", high = "#3498db") +
+  theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3.5),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(2),
+      family              = "subtitle",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2),
+      face = "bold"
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2),
+      face = "bold"
+    )
+  ) 
+  
+```
+
+# Ratings
+
+
+
+
+```{r}
+parfumo_data_clean
+total_ratings <- parfumo_data_clean %>% group_by(Brand) %>% summarise("Total ratings" = sum(Rating_Count)) %>% arrange(-`Total ratings`)
+avg_ratings <- parfumo_data_clean %>% group_by(Brand) %>% summarise("Average rating" = mean(Rating_Value)) %>% arrange(`Average rating`)
+
+ratings <- total_ratings %>% left_join(avg_ratings,by = "Brand") %>% arrange(`Average rating`) %>% tail(15)
+
+rating_order <- ratings$Brand
+```
+
+```{r}
+
+title_text <- "The Fragrance Ratings Guide: Top Brands Compared"
+
+subtitle_text <- "<span style='color:#DDAA0C'><strong>Hermès</span></strong> fragrances lead the pack with an impressive average rating of 8.8, securing their place as the highest-rated brand. Following closely are <span style='color:#236A82'><strong>Roja Parfums</span></strong> <br> with a strong 8.4, <span style='color:#ff4081'><strong>Jean Patou</span></strong> at 8.3, and <span style='color:#D48FDC'><strong>Chanel and Tous</span></strong>, tied at 8.2, rounding out the top five highest-rated perfume brands."
+
+ratings_long <- ratings %>% pivot_longer(cols = c("Total ratings","Average rating"),values_to = "Value",names_to = "Field")
+
+
+ratings_long$Brand <- factor(ratings_long$Brand,levels = rating_order)
+pl_perfume <- ggplot(ratings_long %>% filter(Field == "Average rating"),aes(y = Brand, x = Value,fill = Value)) +  
+  geom_rect(
+    xmin = 7.5, xmax = 10, 
+    ymin = 0, ymax = 20,
+    fill = "#E5BF4A",
+    alpha = 0.2
+  ) +
+  geom_col() + geom_vline(xintercept = 7.5, linetype = "dotted") + 
+  geom_text(aes(label = round(Value,1)), size = 7,
+            color = "white",nudge_x = -0.23) + 
+  annotate(
+    "text",
+    x = 8.4,
+    y = "Sean John",
+    colour = "black",
+    label = 'Highly Rated Fragrances',
+    family = "text",
+    face = "bold",
+    size = unit(10, "pt")
+  ) + scale_fill_continuous(type = "gradient",low = "#132B43",
+  high = "#AF9ACD",) +
+  labs(title = title_text,
+       subtitle = subtitle_text,
+       #caption = caption_text,
+       x = "Average rating",
+       y = "Fragrance brand") +
+    scale_color_met_d(name="Redon") + 
+    theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3.5),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(5),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2.5), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(2), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(1.5),
+      family              = 'text',
+      face                = "bold"   
+    ),
+    axis.title = element_markdown(
+      size                = rel(2),
+      family              = "text"
+    ),
+    axis.text.y  = element_markdown(
+      size = rel(2)
+    ),
+    axis.text.x = element_markdown(
+      size = rel(2)
+    )
+  ) 
+
+
+ggsave("Fragrance_comparison.jpeg",plot = pl_perfume,width =8, height = 5)
+```
+
+```{r}
+# TITLE
+text <- tibble(
+  x = 100, y = 0,
+  label = caption_text
+)
+
+caption <- ggplot(text, aes(x = x, y = y)) +
+  geom_textbox(
+    aes(label = label),
+    box.color = bkg_col, fill=bkg_col, width = unit(35, "lines"),
+    family="text", size = 9, lineheight = 1,
+    hjust = 0.5, vjust = 0.5  # Centering the text
+  ) +
+  coord_cartesian(expand = FALSE, clip = "off") +
+  theme_void() +
+  theme(plot.background = element_rect(color=bkg_col, fill=bkg_col))
+caption
+```
+
+
+#Plot merging
+
+```{r}
+library(patchwork)
+
+pl_final <- (pl_perfume)/(pl_basenotes + pl_midnotes + pl_topnotes)/caption +
+             plot_layout(heights = c(6,4,0.5))
+
+ggsave("Fragrance_infographic.jpeg",plot = pl_final,width =12, height = 7)
+```
+
+
