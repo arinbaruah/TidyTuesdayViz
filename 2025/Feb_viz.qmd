@@ -1,0 +1,109 @@
+---
+title: "February_viz"
+author: "Arindam Baruah"
+format: html
+---
+
+```{r theme}
+
+library(tidyverse)
+library(stringr)
+library(glue)
+library(ggrepel)
+library(ggplot2)
+library(ggtext)
+library(sysfonts)
+library(showtext)
+library(ggbump)
+library(gghighlight)
+library(MetBrewer)
+
+# caption handles
+swd <- str_glue("#SWDchallenge: June 2024 &bull; Source: Synthetic data from ChatGPT<br>")  
+li <- str_glue("<span style='font-family:fa6-brands'>&#xf08c;</span>")  
+gh <- str_glue("<span style='font-family:fa6-brands'>&#xf09b;</span>")
+mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
+tt <- str_glue("#TidyTuesdayR: November 2024 &bull; Source: US Customs and Border Protection (CBP) <br>") 
+
+# plot colors
+bkg_col      <- "#EAB1CA"  
+title_col    <- "#3d3d3d"           
+subtitle_col <- "#3d3d3d"     
+caption_col  <- "#72647D"   
+text_col     <- colorspace::darken("gray40" , 0.2)  
+
+# fonts
+
+font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
+font_add_google("Lato", regular.wt = 400, family = "title")                 
+font_add_google("Radley", regular.wt = 400, family = "subtitle")  
+font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
+font_add_google("Merriweather", regular.wt = 400,family = "caption")
+showtext_auto(enable = TRUE)  
+
+# Plot texts
+
+title_text <- "<span style='color:darkred'>US authorities recording high border encounters <br> across nationalities (2020-2024)</span>"
+
+subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been managing record-high encounters with individuals of various nationalities at the U.S. borders. A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern borders reveals that Mexican nationals remain the most frequently encountered. However, this marks the second consecutive decline in encounters involving Mexican citizens. While the numbers for most other nationalities have remained relatively stable, there has been a significant rise in encounters with individuals from Haiti and Venezuela, who were either apprehended for unauthorized border crossings or deemed inadmissible. "
+
+
+X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
+
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesdayR | #wordcloud #rstudio #ggplot2")
+
+theme_set(theme_minimal(base_size = 15, base_family = "text"))                
+
+# Theme updates
+
+theme_update(
+  plot.title.position   = "plot",
+  plot.caption.position = "plot",
+  legend.position       = 'plot',
+  plot.margin           = margin(t = 10, r = 15, b = 0, l = 15),
+  plot.background       = element_rect(fill = bkg_col, color = bkg_col),
+  panel.background      = element_rect(fill = bkg_col, color = bkg_col),
+  axis.title.x          = element_text(margin = margin(10, 0, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.title.y          = element_text(margin = margin(0, 10, 0, 0), size = rel(1), color = text_col, family = 'text', face = 'bold'),
+  axis.text             = element_text(size = 10, color = text_col, family = 'text',face = "bold"),
+  panel.grid.minor.y    = element_blank(),
+  panel.grid.major.y    = element_line(linetype = "dotted", linewidth = 0.1, color = 'gray40'),
+  panel.grid.minor.x    = element_blank(),
+  panel.grid.major.x    = element_blank(),
+  axis.line.x           = element_line(color = "#d7d7d8", linewidth = .2),
+)
+
+ 
+
+```
+
+
+```{r}
+pop_data <- read_csv(url("https://raw.githubusercontent.com/autistic96/project-2/main/world_population.csv"))
+```
+
+# Data wrangling
+
+
+```{r}
+pop_data <- pop_data %>% select(-c(Rank,CCA3,Capital,"Area (km²)","Density (per km²)","Growth Rate","World Population Percentage" ))
+```
+
+```{r}
+pop_data_long <- pop_data %>% pivot_longer(cols = -c("Country/Territory",Continent),names_to = "Year",values_to = "Population")
+
+pop_data_long <- pop_data_long %>% 
+ separate(Year, into = c("Year", "population"), sep = " ", extra = "merge", fill = "right")
+
+pop_data_long <- pop_data_long %>% mutate(Year = as.integer(Year)) %>% select(-population)
+
+```
+
+```{r}
+pop_data_long_grouped <- pop_data_long %>% 
+  group_by(Continent,Year) %>% 
+  summarise(Total_population = sum(Population)) 
+
+
+```
+
