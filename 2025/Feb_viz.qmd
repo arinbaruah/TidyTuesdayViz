@@ -107,3 +107,55 @@ pop_data_long_grouped <- pop_data_long %>%
 
 ```
 
+
+# FBI data
+
+```{r}
+agencies <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-02-18/agencies.csv')
+```
+
+## Data cleaning
+
+```{r}
+agencies
+```
+
+```{r}
+agencies_nibrs <- agencies %>% filter(is_nibrs == TRUE)
+agencies_nibrs_grouped <- agencies_nibrs %>% group_by(state,year(nibrs_start_date)) %>% summarise(Total_agencies = n())
+```
+
+```{r}
+library(usmap)
+library(mapproj)
+```
+
+```{r}
+state = map_data("state")
+```
+
+```{r}
+agencies <- agencies |>
+  filter(!is.na(longitude),
+         !is.na(latitude),
+         !is.na(agency_type),
+         between(longitude, -130, -60),
+         between(latitude, 20, 55))
+
+
+p1 <- 
+  ggplot()+
+  geom_polygon(
+        data = state, aes(x = long, y = lat, group = group),
+        fill = "#626567",
+        color = "#ECF0F1"
+    ) +
+  geom_point(
+        data = agencies, 
+        aes(x = longitude, y = latitude, color = is_nibrs),shape = 19, alpha = .2, size = 1
+    ) +
+ scale_color_manual(values = c("#C0392B","#52BE80")) +
+ coord_map("conic", lat0 = 30) 
+p1
+```
+
