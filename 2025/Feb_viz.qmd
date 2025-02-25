@@ -126,6 +126,26 @@ agencies_nibrs_grouped <- agencies_nibrs %>% group_by(state,year(nibrs_start_dat
 ```
 
 ```{r}
+
+
+agencies_grouped <- agencies %>% group_by(agency_type,is_nibrs) %>% summarise(Total_nibr = n())
+#agencies_grouped <- agencies %>% group_by(agency_type) %>% mutate(Total_agencies = n())
+agencies_grouped <- agencies_grouped %>% group_by(agency_type) %>% mutate(Total_agencies = sum(Total_nibr))
+agencies_grouped <- agencies_grouped %>% filter(is_nibrs == TRUE) %>% mutate(nibr_adoption_rate = round(100*Total_nibr/Total_agencies,2))
+agencies_grouped
+```
+```{r}
+agencies_grouped <- agencies_grouped %>% select(-is_nibrs)
+agencies <- agencies %>% left_join(agencies_grouped,by = "agency_type")
+```
+
+```{r}
+
+agencies <- agencies %>% mutate(label = str_glue("{agency_type}\n({format(nibr_adoption_rate)} %)"))
+```
+
+
+```{r}
 library(usmap)
 library(mapproj)
 ```
@@ -155,7 +175,8 @@ p1 <-
         aes(x = longitude, y = latitude, color = is_nibrs),shape = 19, alpha = .2, size = 1
     ) +
  scale_color_manual(values = c("#C0392B","#52BE80")) +
- coord_map("conic", lat0 = 30) 
+ coord_map("conic", lat0 = 30) +
+ facet_wrap(~label)
 p1
 ```
 
