@@ -26,7 +26,7 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 tt <- str_glue("#TidyTuesdayR: November 2024 &bull; Source: US Customs and Border Protection (CBP) <br>") 
 
 # plot colors
-bkg_col      <- "#EAB1CA"  
+bkg_col      <- "#F5F5F5"  
 title_col    <- "#3d3d3d"           
 subtitle_col <- "#3d3d3d"     
 caption_col  <- "#72647D"   
@@ -141,7 +141,7 @@ agencies <- agencies %>% left_join(agencies_grouped,by = "agency_type")
 
 ```{r}
 
-agencies <- agencies %>% mutate(label = str_glue("{agency_type}\n({format(nibr_adoption_rate)} %)"))
+agencies <- agencies %>% mutate(label = str_glue("{agency_type}<br>({format(nibr_adoption_rate)} %)"))
 ```
 
 
@@ -159,24 +159,87 @@ agencies <- agencies |>
   filter(!is.na(longitude),
          !is.na(latitude),
          !is.na(agency_type),
+         agency_type != "Unknown",
+         agency_type != "Other",
          between(longitude, -130, -60),
          between(latitude, 20, 55))
 
 
-p1 <- 
+pl <- 
   ggplot()+
   geom_polygon(
         data = state, aes(x = long, y = lat, group = group),
-        fill = "#626567",
-        color = "#ECF0F1"
+        fill = "#37474F",
+        color = "white"
     ) +
   geom_point(
         data = agencies, 
-        aes(x = longitude, y = latitude, color = is_nibrs),shape = 19, alpha = .2, size = 1
+        aes(x = longitude, y = latitude, color = is_nibrs),shape = 19, alpha = .4, size = 1
     ) +
  scale_color_manual(values = c("#C0392B","#52BE80")) +
  coord_map("conic", lat0 = 30) +
- facet_wrap(~label)
-p1
+ labs(caption = caption_text) +
+ facet_wrap(~label) +
+  theme(legend.position = "none",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20, 20, 20, 20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = rel(3),
+    ),
+    legend.text = element_markdown(
+      color = text_col,
+      family = "text",
+      size = rel(2),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(4),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 0.5,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(2), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(1.5), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.3,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    strip.text = element_markdown(
+      size                = rel(2),
+      family              = 'text',
+      face                = "bold",
+      lineheight          = 0.3
+    ),
+    axis.text  = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    axis.line.x = element_blank()
+  ) 
+  
+pl
+
+ggsave("FBI_nibrs_data.jpeg",plot = pl,width =8, height = 5)
 ```
 
