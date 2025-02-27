@@ -35,7 +35,7 @@ text_col     <- colorspace::darken("gray40" , 0.2)
 # fonts
 
 font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
-font_add_google("Lato", regular.wt = 400, family = "title")                 
+font_add_google("Oswald", regular.wt = 400, family = "title")                 
 font_add_google("Radley", regular.wt = 400, family = "subtitle")  
 font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
 font_add_google("Merriweather", regular.wt = 400,family = "caption")
@@ -43,14 +43,16 @@ showtext_auto(enable = TRUE)
 
 # Plot texts
 
-title_text <- "<span style='color:darkred'>US authorities recording high border encounters <br> across nationalities (2020-2024)</span>"
+title_text <- "<span style='color:darkred'>Mapping the Gaps: Uneven Adoption of the FBI’s NIBRS Reporting System</span>"
 
-subtitle_text <- "The U.S. Customs and Border Protection (CBP) has been managing record-high encounters with individuals of various nationalities at the U.S. borders. A chart highlighting the top 10 citizenships of inadmissible individuals at the southern and northern borders reveals that Mexican nationals remain the most frequently encountered. However, this marks the second consecutive decline in encounters involving Mexican citizens. While the numbers for most other nationalities have remained relatively stable, there has been a significant rise in encounters with individuals from Haiti and Venezuela, who were either apprehended for unauthorized border crossings or deemed inadmissible. "
+subtitle_text <- "The FBI’s National Incident-Based Reporting System (NIBRS) is a centralized and detailed crime reporting system that tracks individual criminal incidents across the United States. While many agencies have transitioned to NIBRS, adoption remains uneven. <br> <br>
+
+State police, state agencies, and city councils have been particularly slow to adopt the system. A spatial analysis of adoption patterns reveals that lagging agencies are concentrated in the Southwest and Northeast regions of the U.S., indicating potential structural or administrative challenges in these areas."
 
 
 X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
 
-caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesdayR | #wordcloud #rstudio #ggplot2")
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesdayR | #mapproj #rstudio #ggplot2")
 
 theme_set(theme_minimal(base_size = 15, base_family = "text"))                
 
@@ -155,6 +157,8 @@ state = map_data("state")
 ```
 
 ```{r}
+
+
 agencies <- agencies |>
   filter(!is.na(longitude),
          !is.na(latitude),
@@ -178,7 +182,8 @@ pl <-
     ) +
  scale_color_manual(values = c("#C0392B","#52BE80")) +
  coord_map("conic", lat0 = 30) +
- labs(caption = caption_text) +
+ labs(caption = caption_text,
+      title = title_text) +
  facet_wrap(~label) +
   theme(legend.position = "none",
         panel.spacing = unit(3, "lines"),
@@ -210,10 +215,10 @@ pl <-
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(2), 
+      size                = rel(1), 
       family              = 'subtitle',
       color               = subtitle_col,
-      hjust               = 0,
+      hjust               = 0.5,
       lineheight          = 0.5, 
       margin              = margin(t = 5, b = 1)
     ),
@@ -240,6 +245,6 @@ pl <-
   
 pl
 
-ggsave("FBI_nibrs_data.jpeg",plot = pl,width =8, height = 5)
+ggsave("FBI_nibrs_data.jpeg",plot = pl,width =9, height = 5,dpi=300)
 ```
 
