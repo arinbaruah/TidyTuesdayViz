@@ -1,5 +1,5 @@
 ---
-title: "February_viz"
+title: "March_viz"
 author: "Arindam Baruah"
 format: html
 ---
@@ -246,5 +246,25 @@ pl <-
 pl
 
 ggsave("FBI_nibrs_data.jpeg",plot = pl,width =9, height = 5,dpi=300)
+```
+
+# March
+
+```{r}
+shelter <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-03-04/longbeach.csv')
+```
+
+```{r}
+
+outcome_types <- c("rescue","return to rescue")
+shelter_year <- shelter %>% filter(outcome_type %in% outcome_types) %>% group_by(year(outcome_date)) %>% summarise(Total = n())
+```
+
+```{r}
+shelter %>% group_by(year(outcome_date),outcome_is_dead) %>% summarise(Total = n())
+```
+
+```{r}
+adoptions <- shelter %>% filter(outcome_type == "adoption") %>% group_by(year(outcome_date),animal_type) %>% summarise(Total = n())
 ```
 
