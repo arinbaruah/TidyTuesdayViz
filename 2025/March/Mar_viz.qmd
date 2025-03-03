@@ -267,4 +267,7 @@ shelter %>% group_by(year(outcome_date),outcome_is_dead) %>% summarise(Total = n
 ```{r}
 adoptions <- shelter %>% filter(outcome_type == "adoption") %>% group_by(year(outcome_date),animal_type) %>% summarise(Total = n())
 ```
+```{r}
+shelter %>% filter(outcome_type == "adoption") %>% group_by(animal_type) %>% summarise(Total = n()) %>% arrange(-Total)
+```
 
