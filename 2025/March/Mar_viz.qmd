@@ -265,9 +265,49 @@ shelter %>% group_by(year(outcome_date),outcome_is_dead) %>% summarise(Total = n
 ```
 
 ```{r}
-adoptions <- shelter %>% filter(outcome_type == "adoption") %>% group_by(year(outcome_date),animal_type) %>% summarise(Total = n())
+adoptions_year <- shelter %>% filter(outcome_type == "adoption") %>% group_by(year(outcome_date),animal_type) %>% summarise(Total = n())
 ```
 ```{r}
-shelter %>% filter(outcome_type == "adoption") %>% group_by(animal_type) %>% summarise(Total = n()) %>% arrange(-Total)
+adoptions_total <- shelter %>% filter(outcome_type == "adoption") %>% group_by(animal_type) %>% summarise(Total = n()) %>% arrange(-Total)
+```
+# Group by year for rescue
+
+```{r}
+ggplot(data = shelter_year, 
+       aes(x = `year(outcome_date)`, y = Total)) +
+  geom_rect(
+    xmin = 2020,
+    xmax = 2022,
+    ymin = 0,
+    ymax = 1500,
+    fill = "#E79778",
+    alpha = 0.8
+  ) +
+  geom_area(alpha = 0.6,fill = "#E3A953") +
+  geom_line(linewidth = 1.5) +  
+  annotate(
+    "text",
+    x = 2021,
+    y = 850,
+    colour = "black",
+    label = 'COVID-19 effect',
+    size = unit(4, "pt")
+  ) +
+  geom_point(data = shelter_year %>% filter(`year(outcome_date)` == c(2021,2024)),
+             aes(x = `year(outcome_date)`,
+                 y = Total),
+                 size = 4) +
+  geom_text_repel(data = shelter_year %>% filter(`year(outcome_date)` == c(2021,2024)),
+             aes(label = Total),
+             vjust = 3,
+             hjust = -1) +
+  labs(x  = "Year", 
+       y = "Animal rescues", 
+       title = "Long Island Animal Rescues")
+```
+```{r}
+shelter_year_type <- shelter %>% filter(outcome_type %in% outcome_types) %>% group_by(animal_type,year(outcome_date)) %>% summarise(Total = n())
 ```
 
+
+# Popular adoption choices
