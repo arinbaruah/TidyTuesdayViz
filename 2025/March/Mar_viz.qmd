@@ -309,5 +309,160 @@ ggplot(data = shelter_year,
 shelter_year_type <- shelter %>% filter(outcome_type %in% outcome_types) %>% group_by(animal_type,year(outcome_date)) %>% summarise(Total = n())
 ```
 
+# Waffle chart
 
-# Popular adoption choices
+```{r}
+
+waffle_box <- c(
+  "#E6194B", # Bright Red
+  "#3CB44B", # Vivid Green
+  "#FFE119", # Yellow
+  "#4363D8", # Strong Blue
+  "#F58231", # Orange
+  "#911EB4", # Purple
+  "#42D4F4", # Cyan
+  "#F032E6", # Magenta
+  "#A9A9A9", # Dark Gray
+  "#800000"  # Maroon
+)
+
+
+rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values = Total)) +
+  geom_waffle(color = text_col, size = .1, flip = TRUE) +
+  facet_wrap(~`year(outcome_date)`, nrow = 1, strip.position = "bottom") +
+  scale_x_discrete() +
+  scale_y_continuous(
+   labels = function(x) x * 10,   # 10 observations per row
+    expand = c(0, 0)
+  ) +
+  scale_fill_manual(values = waffle_box) +
+  labs(
+  fill = "",
+   y = "Total rescued",
+  caption = caption_text) + 
+  theme(legend.position = "top",
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = 7,
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = 7,
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(1.3),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.66), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 1.4, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.5), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.6,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title.y = element_text(size = 10,
+                                family = "text")
+  ) #+ coord_equal()
+ggsave("Longbeach_rescue.jpeg",plot = rescue_waffle,width =10, height = 7)
+
+rescue_waffle
+```
+
+
+
+```{r}
+
+subtitle_text <- "The ratio of number of observations (n) to variables (p) indicates the dimensionality of the dataset.<br> Datasets with less observations than the available variables are problematic to analyse.<br> On the other hand,as the number of variables increases, the volume of the space increases exponentially, <br> making data analysis more complex and less intuitive. This is commonly termed as the __curse of dimensionality.__"
+
+waffle_box <- c("#CF352E", "#e6bc00", "#3a9234","#FB8B23")
+
+dim_order <- c("Problematic datasets (< 1)","Low dimensional (> 20)","Moderate dimensional (10-15)", "High dimensional (<= 10)")
+
+ratio_df$status <- factor(ratio_df$status, levels = dim_order)
+
+dimensional_waffle <- ggplot(data = ratio_df,aes(fill = status, values = n)) +
+  geom_waffle(color = text_col, size = .1, flip = TRUE) +
+  facet_wrap(~year, nrow = 1, strip.position = "bottom") +
+  scale_x_discrete() +
+  scale_y_continuous(
+   labels = function(x) x * 10,   # 10 observations per row
+    expand = c(0, 0)
+  ) +
+  scale_fill_manual(values = waffle_box) +
+  labs(
+  title = title_text,
+  fill = "",
+   y = "Number of datasets",
+  subtitle = subtitle_text,
+  caption = caption_text) + 
+  theme(legend.position = "top",
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = 7,
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = 7,
+      face = "bold"
+    ),
+    plot.title            = element_text(
+      size                = rel(1.3),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(0.66), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 1.4, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(0.5), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.6,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+    axis.title.y = element_text(size = 10,
+                                family = "text")
+  ) + coord_equal()
+
+
+
+dimensional_waffle
+
+```
