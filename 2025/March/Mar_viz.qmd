@@ -312,12 +312,12 @@ shelter_year_type <- shelter %>% filter(outcome_type %in% outcome_types) %>% gro
 # Waffle chart
 
 ```{r}
-
+library(waffle)
 waffle_box <- c(
-  "#E6194B", # Bright Red
-  "#3CB44B", # Vivid Green
   "#FFE119", # Yellow
   "#4363D8", # Strong Blue
+  "#E6194B", # Bright Red
+  "#3CB44B", # Vivid Green
   "#F58231", # Orange
   "#911EB4", # Purple
   "#42D4F4", # Cyan
@@ -326,20 +326,25 @@ waffle_box <- c(
   "#800000"  # Maroon
 )
 
+dim_order <- c("cat","dog","bird", "other","rabbit","wild","reptile","livestock","guinea pig","amphibian")
+
+shelter_year_type$animal_type <- factor(shelter_year_type$animal_type, levels = dim_order)
+shelter_year_type <- shelter_year_type[order(shelter_year_type$animal_type), ] #Maintaining the order in waffle chart
 
 rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values = Total)) +
-  geom_waffle(color = text_col, size = .1, flip = TRUE) +
+  geom_waffle(color = text_col, size = .1, flip = TRUE,n_rows = 20) +
   facet_wrap(~`year(outcome_date)`, nrow = 1, strip.position = "bottom") +
   scale_x_discrete() +
   scale_y_continuous(
-   labels = function(x) x * 10,   # 10 observations per row
+   labels = function(x) x*20, 
     expand = c(0, 0)
-  ) +
+  )  +
   scale_fill_manual(values = waffle_box) +
   labs(
   fill = "",
    y = "Total rescued",
-  caption = caption_text) + 
+  caption = caption_text,
+  breaks = dim_order) + 
   theme(legend.position = "top",
     legend.title.position = "top",
     legend.title = element_text(
@@ -383,10 +388,15 @@ rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values 
     ),
     axis.title.y = element_text(size = 10,
                                 family = "text")
-  ) #+ coord_equal()
-ggsave("Longbeach_rescue.jpeg",plot = rescue_waffle,width =10, height = 7)
+  ) + coord_equal()
+ggsave("Longbeach_rescue.jpeg",plot = rescue_waffle,width =12, height = 9)
 
 rescue_waffle
+```
+
+
+```{r}
+ggplot(data = shelter_year_type,aes(x = `year(outcome_date)`, y = Total)) + geom_col()
 ```
 
 
