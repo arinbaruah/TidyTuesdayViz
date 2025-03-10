@@ -26,7 +26,7 @@ mn <- str_glue("<span style='font-family:fa6-brands'>&#xf4f6;</span>")
 tt <- str_glue("#TidyTuesdayR: November 2024 &bull; Source: US Customs and Border Protection (CBP) <br>") 
 
 # plot colors
-bkg_col      <- "#F5F5F5"  
+bkg_col      <- "#FCF3CF"  
 title_col    <- "#3d3d3d"           
 subtitle_col <- "#3d3d3d"     
 caption_col  <- "#72647D"   
@@ -36,7 +36,7 @@ text_col     <- colorspace::darken("gray40" , 0.2)
 
 font_add('fa6-brands','fontawesome/otfs/Font Awesome 6 Brands-Regular-400.otf') 
 font_add_google("Oswald", regular.wt = 400, family = "title")                 
-font_add_google("Radley", regular.wt = 400, family = "subtitle")  
+font_add_google("Roboto", regular.wt = 400, family = "subtitle")  
 font_add_google("Quattrocento Sans", regular.wt = 400, family = "text")        
 font_add_google("Merriweather", regular.wt = 400,family = "caption")
 showtext_auto(enable = TRUE)  
@@ -52,7 +52,7 @@ State police, state agencies, and city councils have been particularly slow to a
 
 X_icon <- glue("<span style='font-family:fa6-brands'>&#xe61b;</span>")
 
-caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesdayR | #mapproj #rstudio #ggplot2")
+caption_text <- str_glue("{li} Arindam Baruah | {X_icon} @wizsights | {gh} arinbaruah | Source: TidyTuesdayR | #geom_waffle #rstudio #ggplot2")
 
 theme_set(theme_minimal(base_size = 15, base_family = "text"))                
 
@@ -273,7 +273,12 @@ adoptions_total <- shelter %>% filter(outcome_type == "adoption") %>% group_by(a
 # Group by year for rescue
 
 ```{r}
-ggplot(data = shelter_year, 
+title_text <- "Long Beach Animal Rescues Reach Record High After COVID-19 Decline"
+
+subtitle_text <- "Animal rescues at Long Beach Animal Shelter surged in 2024, reaching a record high after a decline during COVID-19 lockdowns. Data from the City of Long Beach Animal Care Services <br> highlights that <strong> cats and dogs were the most frequently rescued animals, while amphibians remained the rarest.</strong>"
+
+
+rescue_line <- ggplot(data = shelter_year, 
        aes(x = `year(outcome_date)`, y = Total)) +
   geom_rect(
     xmin = 2020,
@@ -291,20 +296,86 @@ ggplot(data = shelter_year,
     y = 850,
     colour = "black",
     label = 'COVID-19 effect',
-    size = unit(4, "pt")
+    size = unit(30, "pt")
   ) +
   geom_point(data = shelter_year %>% filter(`year(outcome_date)` == c(2021,2024)),
              aes(x = `year(outcome_date)`,
                  y = Total),
-                 size = 4) +
+                 size = 6) +
   geom_text_repel(data = shelter_year %>% filter(`year(outcome_date)` == c(2021,2024)),
              aes(label = Total),
              vjust = 3,
-             hjust = -1) +
+             hjust = -1,
+             size = 30) +
   labs(x  = "Year", 
-       y = "Animal rescues", 
-       title = "Long Island Animal Rescues")
+       y = "Total rescues",
+       title = title_text,
+       subtitle = subtitle_text) +
+  theme(legend.position = "top",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20,20,20,20),
+    legend.title.position = "top",
+    legend.title = element_text(
+      color = text_col,
+      hjust = 0.5,
+      family = "text",
+      face = "bold",
+      size = 7,
+    ),
+    legend.text = element_text(
+      color = text_col,
+      family = "text",
+      size = rel(4),
+      face = "bold"
+    ),
+    plot.title            = element_markdown(
+      size                = rel(12),
+      family              = "title",
+      face                = "bold",
+      color               = title_col,
+      lineheight          = 1.1,
+      margin              = margin(t = 5, b = 5),
+      hjust               = 0.5
+    ),        
+    plot.subtitle         = element_markdown(
+      size                = rel(7), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0,
+      lineheight          = 0.5, 
+      margin              = margin(t = 5, b = 1)
+    ),
+      plot.caption          = element_markdown(
+      size                = rel(3), 
+      family              = 'caption',
+      color               = caption_col,
+      lineheight          = 0.6,
+      hjust               = 0.5,
+      halign              = 0,
+      margin              = margin(t = 10, b = 10)
+    ),
+      strip.text          = element_markdown(
+      size                = rel(4), 
+      family              = 'subtitle',
+      color               = subtitle_col,
+      hjust               = 0.5,
+      lineheight          = 1.4, 
+      margin              = margin(t = 5, b = 1)
+    ),
+    axis.title = element_text(size = rel(5),
+                                family = "text"),
+    axis.text = element_text(size = rel(5),
+                                family = "text")
+  ) 
+
+ggsave("Longbeach_rescue_trend.jpeg",plot = rescue_line,width = 20, height = 8)
 ```
+
+
+
 ```{r}
 shelter_year_type <- shelter %>% filter(outcome_type %in% outcome_types) %>% group_by(animal_type,year(outcome_date)) %>% summarise(Total = n())
 ```
@@ -332,7 +403,7 @@ shelter_year_type$animal_type <- factor(shelter_year_type$animal_type, levels = 
 shelter_year_type <- shelter_year_type[order(shelter_year_type$animal_type), ] #Maintaining the order in waffle chart
 
 rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values = Total)) +
-  geom_waffle(color = text_col, size = .1, flip = TRUE,n_rows = 20) +
+  geom_waffle(color = "black", size = .1, flip = TRUE,n_rows = 20)  +
   facet_wrap(~`year(outcome_date)`, nrow = 1, strip.position = "bottom") +
   scale_x_discrete() +
   scale_y_continuous(
@@ -342,10 +413,15 @@ rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values 
   scale_fill_manual(values = waffle_box) +
   labs(
   fill = "",
-   y = "Total rescued",
+   y = "Total rescues",
   caption = caption_text,
   breaks = dim_order) + 
   theme(legend.position = "top",
+        panel.spacing = unit(3, "lines"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        plot.margin = margin(20,20,20,20),
     legend.title.position = "top",
     legend.title = element_text(
       color = text_col,
@@ -357,11 +433,11 @@ rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values 
     legend.text = element_text(
       color = text_col,
       family = "text",
-      size = 7,
+      size = rel(4),
       face = "bold"
     ),
     plot.title            = element_text(
-      size                = rel(1.3),
+      size                = rel(4),
       family              = "title",
       face                = "bold",
       color               = title_col,
@@ -370,7 +446,7 @@ rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values 
       hjust               = 0.5
     ),        
     plot.subtitle         = element_markdown(
-      size                = rel(0.66), 
+      size                = rel(3), 
       family              = 'subtitle',
       color               = subtitle_col,
       hjust               = 0,
@@ -378,7 +454,7 @@ rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values 
       margin              = margin(t = 5, b = 1)
     ),
       plot.caption          = element_markdown(
-      size                = rel(0.5), 
+      size                = rel(5), 
       family              = 'caption',
       color               = caption_col,
       lineheight          = 0.6,
@@ -386,13 +462,35 @@ rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values 
       halign              = 0,
       margin              = margin(t = 10, b = 10)
     ),
-    axis.title.y = element_text(size = 10,
+      strip.text          = element_markdown(
+      size                = rel(6), 
+      family              = 'text',
+      color               = subtitle_col,
+      hjust               = 0.5,
+      lineheight          = 1.4, 
+      margin              = margin(t = 5, b = 1)
+    ),
+    axis.title.y = element_text(size = rel(6),
+                                family = "text"),
+    axis.text.y = element_text(size = rel(6),
                                 family = "text")
-  ) + coord_equal()
-ggsave("Longbeach_rescue.jpeg",plot = rescue_waffle,width =12, height = 9)
+  ) 
+ggsave("Longbeach_rescue.jpeg",plot = rescue_waffle,width = 20, height = 8)
 
 rescue_waffle
 ```
+
+```{r}
+
+finalPlot <- rescue_line/rescue_waffle +
+  plot_layout(heights = c(12.5, 12.5)) 
+  
+
+ggsave("Longbeachshelter_infograph.jpeg",plot = finalPlot,width = 40, height = 25)
+```
+
+
+
 
 
 ```{r}
