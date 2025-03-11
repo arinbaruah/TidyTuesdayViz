@@ -275,7 +275,7 @@ adoptions_total <- shelter %>% filter(outcome_type == "adoption") %>% group_by(a
 ```{r}
 title_text <- "Long Beach Animal Rescues Reach Record High After COVID-19 Decline"
 
-subtitle_text <- "Animal rescues at Long Beach Animal Shelter surged in 2024, reaching a record high after a decline during COVID-19 lockdowns. Data from the City of Long Beach Animal Care Services <br> highlights that <strong> cats and dogs were the most frequently rescued animals, while amphibians remained the rarest.</strong>"
+subtitle_text <- "Animal rescues at Long Beach Animal Shelter surged in 2024, reaching a record high after a decline during COVID-19 lockdowns. Data from the City of Long Beach Animal Care Services <br> highlights that <strong> cats and dogs were the most frequently rescued  animals, while amphibians remained the rarest.</strong>"
 
 
 rescue_line <- ggplot(data = shelter_year, 
@@ -433,7 +433,7 @@ rescue_waffle <- ggplot(data = shelter_year_type,aes(fill = animal_type, values 
     legend.text = element_text(
       color = text_col,
       family = "text",
-      size = rel(4),
+      size = rel(6),
       face = "bold"
     ),
     plot.title            = element_text(
