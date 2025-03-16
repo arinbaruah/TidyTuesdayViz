@@ -289,7 +289,7 @@ rescue_line <- ggplot(data = shelter_year,
     alpha = 0.8
   ) +
   geom_area(alpha = 0.6,fill = "#E3A953") +
-  geom_line(linewidth = 1.5) +  
+  geom_line(linewidth = 3) +  
   annotate(
     "text",
     x = 2021,
@@ -301,7 +301,7 @@ rescue_line <- ggplot(data = shelter_year,
   geom_point(data = shelter_year %>% filter(`year(outcome_date)` == c(2021,2024)),
              aes(x = `year(outcome_date)`,
                  y = Total),
-                 size = 6) +
+                 size = 8) +
   geom_text_repel(data = shelter_year %>% filter(`year(outcome_date)` == c(2021,2024)),
              aes(label = Total),
              vjust = 3,
@@ -365,9 +365,9 @@ rescue_line <- ggplot(data = shelter_year,
       lineheight          = 1.4, 
       margin              = margin(t = 5, b = 1)
     ),
-    axis.title = element_text(size = rel(5),
+    axis.title = element_text(size = rel(6),
                                 family = "text"),
-    axis.text = element_text(size = rel(5),
+    axis.text = element_text(size = rel(6),
                                 family = "text")
   ) 
 
